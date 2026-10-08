@@ -16,15 +16,99 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid Background="{DynamicResource WindowBackground}">
-        <Button x:Name="ThemeButton" Classes="ModeSwitcher" ToolTip.Tip="Váltás sötét/világos mód között"
-                Background="Transparent" Foreground="{DynamicResource TextPrimary}"
-                Width="44" Height="44" HorizontalAlignment="Right" VerticalAlignment="Top"
-                Margin="0,0,0,0" Padding="0" ZIndex="10">
-            <ic:MaterialIcon x:Name="ThemeIcon" Kind="MoonWaningCrescent" Width="22" Height="22"/>
-        </Button>
-        <TextBlock Text="{Binding Greeting}" Foreground="{DynamicResource TextPrimary}"
-                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-    </Grid>
+    <DrawerPage DrawerLength="250" CompactDrawerLength="40" x:Name="myDrawerPage" DrawerLayoutBehavior="CompactInline">
+        <DrawerPage.DrawerIcon>
+            <ic:MaterialIconExt Kind="HamburgerMenu" IconSize="18"/>
+        </DrawerPage.DrawerIcon>
 
+        <DrawerPage.DrawerHeader>
+        </DrawerPage.DrawerHeader>
+
+        <DrawerPage.Drawer>
+            <Grid RowDefinitions="Auto Auto *" Margin="0">
+                <Button Classes="drawerButton" Grid.Row="0" >
+                    <Grid ColumnDefinitions="40 *" Margin="0">
+                        <Border Grid.Column="0">
+                            <ic:MaterialIconExt Kind="Bookshelf" IconSize="18"/>
+                        </Border>
+                        <TextBlock Grid.Column="1" Text="Könyvtár kezelése" IsVisible="{Binding #myDrawerPage.IsOpen}"/>
+                    </Grid>
+                </Button>
+                <Button Classes="drawerButton" Grid.Row="1">
+                    <Grid ColumnDefinitions="40 *" Margin="0">
+                        <Border Grid.Column="0">
+                            <ic:MaterialIconExt Kind="CalendarClock" IconSize="18" />
+                        </Border>
+                        <TextBlock Grid.Column="1" Text="Kölcsönzések kezelése" IsVisible="{Binding #myDrawerPage.IsOpen}"/>
+                    </Grid>
+                </Button>
+                <Button Grid.Row="2" Background="{DynamicResource FocusBorder}" VerticalAlignment="Bottom" Classes="drawerButton" Click="ProfileButton_Click">
+                    <Grid ColumnDefinitions="40 *" VerticalAlignment="Bottom" Margin="0" Height="40">
+                        <Border Grid.Column="0" >
+                            <ic:MaterialIconExt Kind="AccountCircle" IconSize="18"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" IsVisible="{Binding #myDrawerPage.IsOpen}" VerticalAlignment="Center">
+                            <TextBlock Text="Szlonkai Benedek" Foreground="{DynamicResource PrimaryText}" FontSize="14"/>
+                            <TextBlock Text="szlonkaibenedek@gmail.com" FontSize="10"/>
+                        </StackPanel>
+                    </Grid>
+                </Button>
+            </Grid>
+        </DrawerPage.Drawer>
+
+        <DrawerPage.DrawerFooter>
+            <Grid Background="Transparent" Margin="0 5 5 5">
+                <Button Classes="linkButton">
+                    <Grid ColumnDefinitions="40 *">
+                        <Border Grid.Column="0" Margin="0">
+                            <ic:MaterialIconExt Kind="Logout" IconSize="18"/>
+                        </Border>
+                        <TextBlock Grid.Column="1" Text="Kijelentkezés" IsVisible="{Binding #myDrawerPage.IsOpen}"/>
+                    </Grid>
+                </Button>
+                <Button x:Name="ThemeButton" Classes="ModeSwitcher" ToolTip.Tip="Váltás sötét/világos mód között"
+                        Background="Transparent" Foreground="{DynamicResource TextPrimary}"
+                        HorizontalAlignment="Right" IsVisible="{Binding #myDrawerPage.IsOpen}"
+                        Margin="0,0,0,0" Padding="2" ZIndex="10" >
+                    <ic:MaterialIcon x:Name="ThemeIcon" Kind="MoonWaningCrescent" Width="16" Height="16"/>
+                </Button>
+                <Button x:Name="SettingsButton" Content="{ic:MaterialIconExt Settings}"
+                        HorizontalAlignment="Right" Margin="0 0 40 0"
+                        IsVisible="{Binding #myDrawerPage.IsOpen}"/>
+            </Grid>
+        </DrawerPage.DrawerFooter>
+
+        <ContentControl x:Name="MainContent" />
+    </DrawerPage>
+
+    <Window.Styles>
+        <!-- Keep DrawerPage toggle neutral, including its checked/open state. -->
+        <Style Selector="DrawerPage /template/ ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style Selector="DrawerPage /template/ ToggleButton:checked">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+        <Style Selector="DrawerPage /template/ ToggleButton#PART_CompactPaneToggle">
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="DrawerPage /template/ ToggleButton#PART_CompactPaneToggle:checked">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="DrawerPage /template/ ToggleButton#PART_CompactPaneToggle:pointerover">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="DrawerPage /template/ ToggleButton#PART_CompactPaneToggle:checked /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+        <Style Selector="DrawerPage /template/ Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+    </Window.Styles>
 </Window>
