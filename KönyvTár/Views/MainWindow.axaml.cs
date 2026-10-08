@@ -8,6 +8,8 @@ namespace KönyvTár.Views;
 
 public partial class MainWindow : Window
 {
+    private LibraryEditView _libraryEditView = new LibraryEditView();
+    private LendingsView _lendingsView = new LendingsView();
     private SettingsView _settingsView = new SettingsView();
     private ProfileView _profileView =  new ProfileView();
     
@@ -37,5 +39,15 @@ public partial class MainWindow : Window
     private void ProfileButton_Click(object? sender, RoutedEventArgs e)
     {
         MainContent.Content = _profileView;
+    }
+    
+    private void LibraryEditButton_Click(object? sender, RoutedEventArgs e)
+    {
+        MainContent.Content = _libraryEditView;
+    }
+    
+    private void LendingsButton_Click(object? sender, RoutedEventArgs e)
+    {
+        MainContent.Content = _lendingsView;
     }
 }

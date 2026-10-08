@@ -26,7 +26,7 @@
 
         <DrawerPage.Drawer>
             <Grid RowDefinitions="Auto Auto *" Margin="0">
-                <Button Classes="drawerButton" Grid.Row="0" >
+                <Button Classes="drawerButton" Grid.Row="0" Click="LibraryEditButton_Click">
                     <Grid ColumnDefinitions="40 *" Margin="0">
                         <Border Grid.Column="0">
                             <ic:MaterialIconExt Kind="Bookshelf" IconSize="18"/>
@@ -34,7 +34,7 @@
                         <TextBlock Grid.Column="1" Text="Könyvtár kezelése" IsVisible="{Binding #myDrawerPage.IsOpen}"/>
                     </Grid>
                 </Button>
-                <Button Classes="drawerButton" Grid.Row="1">
+                <Button Classes="drawerButton" Grid.Row="1" Click="LendingsButton_Click">
                     <Grid ColumnDefinitions="40 *" Margin="0">
                         <Border Grid.Column="0">
                             <ic:MaterialIconExt Kind="CalendarClock" IconSize="18" />
