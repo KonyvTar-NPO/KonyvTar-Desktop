@@ -19,12 +19,12 @@
             <Grid Grid.Row="1" ColumnDefinitions="300,300" RowDefinitions="Auto Auto" ColumnSpacing="20" >
                 <StackPanel Grid.Column="0" Spacing="12" Grid.Row="0">
                     <StackPanel Spacing="0">
-                        <TextBlock Text="Keresztnév" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
-                        <TextBox x:Name="FirstNameTextBox" Margin="0,4,0,0" Classes="inputArea"/>
-                    </StackPanel>
-                    <StackPanel Spacing="0">
                         <TextBlock Text="Vezetéknév" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
                         <TextBox x:Name="LastNameTextBox" Margin="0,4,0,0" Classes="inputArea"/>
+                    </StackPanel>
+                    <StackPanel Spacing="0">
+                        <TextBlock Text="Keresztnév" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        <TextBox x:Name="FirstNameTextBox" Margin="0,4,0,0" Classes="inputArea"/>
                     </StackPanel>
                     <StackPanel Spacing="0">
                         <TextBlock Text="E-mail cím" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>

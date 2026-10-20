@@ -130,6 +130,28 @@
         <Style Selector="TextBox:disabled /template/ ScrollViewer">
             <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
         </Style>
+        <Style Selector="AutoCompleteBox">
+            <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InputBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="14,10"/>
+        </Style>
+        <Style Selector="AutoCompleteBox /template/ TextBox#PART_TextBox">
+            <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InputBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="14,10"/>
+        </Style>
+        <Style Selector="AutoCompleteBox:focus /template/ TextBox#PART_TextBox">
+            <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource FocusBorder}"/>
+        </Style>
+        <Style Selector="AutoCompleteBox:pointerover /template/ TextBox#PART_TextBox">
+            <Setter Property="Background" Value="{DynamicResource InputHoverBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InputHoverBorder}"/>
+        </Style>
         <Style Selector="ComboBox">
             <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource InputBorder}"/>
@@ -259,8 +281,13 @@
             <Setter Property="IsVisible" Value="True"/>
         </Style>
         
-        
-        
+        <Style Selector="TableView">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBackground}"/>
+        </Style>
+        <Style Selector="TableViewRow">
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+        </Style>
     </Application.Styles>
              
 </Application>

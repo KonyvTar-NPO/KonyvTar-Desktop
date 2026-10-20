@@ -2,13 +2,15 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Material.Icons;
+using KönyvTár.ViewModels;
 using KönyvTár.Views.Main;
 
 namespace KönyvTár.Views;
 
 public partial class MainWindow : Window
 {
-    private LibraryEditView _libraryEditView = new LibraryEditView();
+    private HomeView _homeView = new HomeView();
+    private LibraryView _libraryView = new LibraryView();
     private LendingsView _lendingsView = new LendingsView();
     private SettingsView _settingsView = new SettingsView();
     private ProfileView _profileView =  new ProfileView();
@@ -16,6 +18,10 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        DataContext = new MainWindowViewModel();
+        _libraryView.DataContext = DataContext;
+        _lendingsView.DataContext = DataContext;
+        MainContent.Content = _homeView;
         ThemeButton.Click += OnThemeButtonClick;
         SettingsButton.Click += OnSettingsButtonClick;
         UpdateThemeButton();
@@ -41,13 +47,18 @@ public partial class MainWindow : Window
         MainContent.Content = _profileView;
     }
     
-    private void LibraryEditButton_Click(object? sender, RoutedEventArgs e)
+    private void LibraryButton_Click(object? sender, RoutedEventArgs e)
     {
-        MainContent.Content = _libraryEditView;
+        MainContent.Content = _libraryView;
     }
     
     private void LendingsButton_Click(object? sender, RoutedEventArgs e)
     {
         MainContent.Content = _lendingsView;
+    }
+
+    private void HomeButton_Click(object? sender, RoutedEventArgs e)
+    {
+        MainContent.Content = _homeView;
     }
 }

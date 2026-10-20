@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace KönyvTár.Views.Main;
 
-public partial class LibraryEditView : UserControl
+public partial class HomeView : UserControl
 {
-    public LibraryEditView()
+    public HomeView()
     {
         InitializeComponent();
     }
