@@ -18,7 +18,7 @@
 
     <DrawerPage DrawerLength="250" CompactDrawerLength="40" x:Name="myDrawerPage" DrawerLayoutBehavior="CompactInline">
         <DrawerPage.DrawerIcon>
-            <ic:MaterialIconExt Kind="HamburgerMenu" IconSize="18"/>
+            <ic:MaterialIconExt Kind="HamburgerMenu" IconSize="18" />
         </DrawerPage.DrawerIcon>
 
         <DrawerPage.DrawerHeader>
@@ -28,7 +28,7 @@
             <Grid RowDefinitions="Auto Auto Auto *" Margin="0">
                 <Button Classes="drawerButton" Grid.Row="0" Click="HomeButton_Click">
                     <Grid ColumnDefinitions="40 *" Margin="0">
-                        <Border Grid.Column="0">
+                        <Border Grid.Column="0" ToolTip.Tip="Kezdőlap">
                             <ic:MaterialIconExt Kind="HomeVariant" IconSize="18"/>
                         </Border>
                         <TextBlock Grid.Column="1" Text="Kezdőlap" IsVisible="{Binding #myDrawerPage.IsOpen}"/>
@@ -36,15 +36,15 @@
                 </Button>
                 <Button Classes="drawerButton" Grid.Row="1" Click="LibraryButton_Click">
                     <Grid ColumnDefinitions="40 *" Margin="0">
-                        <Border Grid.Column="0">
-                            <ic:MaterialIconExt Kind="Bookshelf" IconSize="18"/>
+                        <Border Grid.Column="0" ToolTip.Tip="Könyvtár kezelése">
+                            <ic:MaterialIconExt Kind="Bookshelf" IconSize="18" />
                         </Border>
                         <TextBlock Grid.Column="1" Text="Könyvtár kezelése" IsVisible="{Binding #myDrawerPage.IsOpen}"/>
                     </Grid>
                 </Button>
                 <Button Classes="drawerButton" Grid.Row="2" Click="LendingsButton_Click">
                     <Grid ColumnDefinitions="40 *" Margin="0">
-                        <Border Grid.Column="0">
+                        <Border Grid.Column="0" ToolTip.Tip="Kölcsönzések kezelése">
                             <ic:MaterialIconExt Kind="CalendarClock" IconSize="18" />
                         </Border>
                         <TextBlock Grid.Column="1" Text="Kölcsönzések kezelése" IsVisible="{Binding #myDrawerPage.IsOpen}"/>

@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Linq;
 using KönyvTár.ViewModels;
 using KönyvTár.Services;
+using KönyvTár.Models;
 
 namespace KönyvTár.Views.Main;
 
@@ -123,5 +124,19 @@ public partial class LibraryView : UserControl
             Console.WriteLine(exception);
             throw;
         }
+    }
+
+    private async void EditBookData(object? sender, RoutedEventArgs e)
+    {
+        if (_viewModel?.SelectedBook is not { } book)
+            return;
+
+        var owner = TopLevel.GetTopLevel(this) as Window;
+        if (owner is null)
+            return;
+
+        var editedBook = await new EditBookWindow(book).ShowDialog<Book?>(owner);
+        if (editedBook is not null)
+            _viewModel.UpdateBook(book, editedBook);
     }
 }

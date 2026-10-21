@@ -1,0 +1,52 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="KönyvTár.Views.Main.EditBookWindow"
+        Title="Könyv adatainak szerkesztése"
+        Width="520" Height="620"
+        MinWidth="420" MinHeight="500"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        x:CompileBindings="False">
+    <Border Padding="24" Background="{DynamicResource WindowBackground}">
+        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="20">
+            <TextBlock Text="Könyv adatainak szerkesztése"
+                       FontSize="22" FontWeight="SemiBold" />
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="14">
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Cím" FontWeight="SemiBold" />
+                        <TextBox x:Name="TitleTextBox" />
+                    </StackPanel>
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Szerző" FontWeight="SemiBold" />
+                        <TextBox x:Name="AuthorTextBox" />
+                    </StackPanel>
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Kiadó" FontWeight="SemiBold" />
+                        <TextBox x:Name="PublisherTextBox" />
+                    </StackPanel>
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="ISBN" FontWeight="SemiBold" />
+                        <TextBox x:Name="IsbnTextBox" />
+                    </StackPanel>
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Leltári szám" FontWeight="SemiBold" />
+                        <TextBox x:Name="InventoryCodeTextBox" />
+                    </StackPanel>
+                    <TextBlock x:Name="ValidationTextBlock"
+                               Foreground="IndianRed"
+                               TextWrapping="Wrap"
+                               IsVisible="False" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal"
+                        HorizontalAlignment="Right" Spacing="10">
+                <Button Content="Mégse" Click="CancelButton_Click" />
+                <Button Content="Mentés" Classes="primaryButton"
+                        Click="SaveButton_Click" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

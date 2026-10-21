@@ -164,6 +164,24 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public bool HasSelectedBook => SelectedBook is not null;
 
+    public void UpdateBook(Book originalBook, Book updatedBook)
+    {
+        var index = Books
+            .Select((book, bookIndex) => new { book, bookIndex })
+            .FirstOrDefault(item => item.book.InventoryCode == originalBook.InventoryCode)
+            ?.bookIndex;
+
+        if (index is null)
+            return;
+
+        Books[index.Value] = updatedBook;
+        if (SelectedBook?.InventoryCode == originalBook.InventoryCode)
+            SelectedBook = updatedBook;
+
+        RefreshStatusFilters();
+        RefreshFilteredBooks();
+    }
+
     public GridLength BookTableColumnWidth => HasSelectedBook
         ? new GridLength(3, GridUnitType.Star)
         : new GridLength(1, GridUnitType.Star);
@@ -220,10 +238,7 @@ public partial class MainWindowViewModel : ViewModelBase
         foreach (var lending in await lendingsTask)
             Lendings.Add(lending);
 
-        StatusFilters.Clear();
-        StatusFilters.Add("Minden");
-        foreach (var status in Books.Select(book => book.Status).Where(status => !string.IsNullOrWhiteSpace(status)).Distinct())
-            StatusFilters.Add(status);
+        RefreshStatusFilters();
 
         LendingStatusFilters.Clear();
         LendingStatusFilters.Add("Minden");
@@ -284,6 +299,19 @@ public partial class MainWindowViewModel : ViewModelBase
 
         if (SelectedBook is not null && !FilteredBooks.Contains(SelectedBook))
             SelectedBook = null;
+    }
+
+    private void RefreshStatusFilters()
+    {
+        StatusFilters.Clear();
+        StatusFilters.Add("Minden");
+        foreach (var status in Books.Select(book => book.Status)
+                     .Where(status => !string.IsNullOrWhiteSpace(status))
+                     .Distinct())
+            StatusFilters.Add(status);
+
+        if (!StatusFilters.Contains(StatusFilter))
+            StatusFilter = "Minden";
     }
 
     private void RefreshFilteredLendings()

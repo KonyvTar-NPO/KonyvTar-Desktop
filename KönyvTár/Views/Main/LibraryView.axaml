@@ -49,56 +49,61 @@
                 CornerRadius="10">
             <ScrollViewer x:Name="DetailsScrollViewer" VerticalScrollBarVisibility="Auto" Padding="15 20 15 20">
                 <StackPanel Spacing="12">
-                <TextBlock Text="Könyv adatai" FontSize="20" FontWeight="SemiBold" />
-                <Border Height="1" Background="{DynamicResource BorderColor}" />
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Cím" FontWeight="SemiBold" />
-                    <TextBlock Text="{Binding SelectedBook.Title}" TextWrapping="Wrap" />
-                </StackPanel>
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Szerző" FontWeight="SemiBold" />
-                    <TextBlock Text="{Binding SelectedBook.Author}" TextWrapping="Wrap" />
-                </StackPanel>
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Kiadó" FontWeight="SemiBold" />
-                    <TextBlock Text="{Binding SelectedBook.Publisher}" TextWrapping="Wrap" />
-                </StackPanel>
-                <StackPanel Spacing="4">
-                    <TextBlock Text="ISBN" FontWeight="SemiBold" />
-                    <TextBlock Text="{Binding SelectedBook.ISBN}" TextWrapping="Wrap" />
-                </StackPanel>
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Leltári szám" FontWeight="SemiBold" />
-                    <TextBlock Text="{Binding SelectedBook.InventoryCode}" TextWrapping="Wrap" />
-                </StackPanel>
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Állapot" FontWeight="SemiBold" />
-                    <TextBlock Text="{Binding SelectedBook.Status}" TextWrapping="Wrap" />
-                </StackPanel>
-                <Border Height="1" Margin="0,8,0,0" Background="{DynamicResource BorderColor}" />
-                <TextBlock Text="Kölcsönzés" FontSize="20" FontWeight="SemiBold" />
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Felhasználó" FontWeight="SemiBold" Margin="0 0 0 10" />
-                    <AutoCompleteBox ItemsSource="{Binding Users}"
-                                     SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
-                                     ValueMemberBinding="{Binding Name}"
-                                     FilterMode="Contains"
-                                     MinimumPrefixLength="1"
-                                     PlaceholderText="Felhasználó keresése..."  />
-                </StackPanel>
-                <TextBlock Text="Kölcsönzés időszaka" FontWeight="SemiBold" />
-                <Calendar x:Name="LendingCalendar"
-                          SelectionMode="SingleRange"
-                          IsVisible="{Binding IsCustomLendingDuration}"
-                          HorizontalAlignment="Left"/>
-                <ComboBox ItemsSource="{Binding LendingDurationOptions}"
-                          SelectedItem="{Binding SelectedLendingDuration, Mode=TwoWay}" />
-                <TextBox Text="{Binding LendingDateRange}" IsReadOnly="True"
-                         Height="36" IsEnabled="False" />
-                <Button Content="Kölcsönzés indítása" Command="{Binding InitiateLendingCommand}"
-                        HorizontalAlignment="Stretch" Classes="primaryButton" />
-                <TextBlock Text="{Binding LendingStatusMessage}" TextWrapping="Wrap"
-                           Foreground="{DynamicResource SecondaryText}" HorizontalAlignment="Center" />
+                    <Grid HorizontalAlignment="Stretch" >
+                        <TextBlock Text="Könyv adatai" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <Button HorizontalAlignment="Right" VerticalAlignment="Center" Click="EditBookData">
+                                <ic:MaterialIcon Kind="Pencil"/>
+                        </Button>
+                    </Grid>
+                    <Border Height="1" Background="{DynamicResource BorderColor}" />
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Cím" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding SelectedBook.Title}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Szerző" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding SelectedBook.Author}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Kiadó" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding SelectedBook.Publisher}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="ISBN" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding SelectedBook.ISBN}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Leltári szám" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding SelectedBook.InventoryCode}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Állapot" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding SelectedBook.Status}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <Border Height="1" Margin="0,8,0,0" Background="{DynamicResource BorderColor}" />
+                    <TextBlock Text="Kölcsönzés" FontSize="20" FontWeight="SemiBold" />
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Felhasználó" FontWeight="SemiBold" Margin="0 0 0 10" />
+                        <AutoCompleteBox ItemsSource="{Binding Users}"
+                                         SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
+                                         ValueMemberBinding="{Binding Name}"
+                                         FilterMode="Contains"
+                                         MinimumPrefixLength="1"
+                                         PlaceholderText="Felhasználó keresése..."  />
+                    </StackPanel>
+                    <TextBlock Text="Kölcsönzés időszaka" FontWeight="SemiBold" />
+                    <Calendar x:Name="LendingCalendar"
+                              SelectionMode="SingleRange"
+                              IsVisible="{Binding IsCustomLendingDuration}"
+                              HorizontalAlignment="Left"/>
+                    <ComboBox ItemsSource="{Binding LendingDurationOptions}"
+                              SelectedItem="{Binding SelectedLendingDuration, Mode=TwoWay}" />
+                    <TextBox Text="{Binding LendingDateRange}" IsReadOnly="True"
+                             Height="36" IsEnabled="False" />
+                    <Button Content="Kölcsönzés indítása" Command="{Binding InitiateLendingCommand}"
+                            HorizontalAlignment="Stretch" Classes="primaryButton" />
+                    <TextBlock Text="{Binding LendingStatusMessage}" TextWrapping="Wrap"
+                               Foreground="{DynamicResource SecondaryText}" HorizontalAlignment="Center" />
                 </StackPanel>
             </ScrollViewer>
         </Border>
