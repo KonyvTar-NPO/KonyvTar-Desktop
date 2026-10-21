@@ -33,4 +33,20 @@ public sealed class TemporaryLendingService : ILendingService
             "Központi könyvtár", "Szlonkai Benedek", request.From, request.To, null, "Aktív", true));
         return Task.CompletedTask;
     }
+
+    public Task UpdateLendingAsync(LendingRecord lending, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var index = Lendings.FindIndex(item => item.Id == lending.Id);
+        if (index >= 0)
+            Lendings[index] = lending;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteLendingAsync(string lendingId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        Lendings.RemoveAll(item => item.Id == lendingId);
+        return Task.CompletedTask;
+    }
 }

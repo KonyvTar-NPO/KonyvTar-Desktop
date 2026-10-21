@@ -32,7 +32,7 @@
             </Grid.ColumnDefinitions>
             <TableView Grid.Column="0" ItemsSource="{Binding FilteredLendings}"
                        SelectedItem="{Binding SelectedLending, Mode=TwoWay}"
-                       SelectionMode="Toggle" CanUserResizeColumns="False" CornerRadius="10">
+                       SelectionMode="Toggle" CanUserResizeColumns="False" CornerRadius="10" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
                 <TableView.Columns>
                     <TableViewColumn Header="Azonosító" Binding="{Binding Id}" Width="*" />
                     <TableViewColumn Header="Könyvtári szám" Binding="{Binding InventoryCode}" Width="1.3*" />
@@ -50,26 +50,32 @@
                     <StackPanel Spacing="12">
                         <TextBlock Text="Kölcsönzés adatai" FontSize="20" FontWeight="SemiBold" />
                         <Border Height="1" Background="{DynamicResource BorderColor}" />
-                        <TextBlock Text="Azonosító" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding SelectedLending.Id}" />
-                        <TextBlock Text="Könyvtári szám" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding SelectedLending.InventoryCode}" />
-                        <TextBlock Text="Felhasználó" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding SelectedLending.UserName}" />
-                        <TextBlock Text="Könyvtár" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding SelectedLending.LibraryName}" />
-                        <TextBlock Text="Könyvtáros" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding SelectedLending.LibrarianName}" />
-                        <TextBlock Text="Kölcsönzés dátuma" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding SelectedLending.BorrowedAt, StringFormat='{}{0:yyyy. MM. dd.}'}" />
-                        <TextBlock Text="Lejárati dátum" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding SelectedLending.DueDate, StringFormat='{}{0:yyyy. MM. dd.}'}" />
-                        <TextBlock Text="Visszahozva" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding SelectedLending.ReturnedAt, StringFormat='{}{0:yyyy. MM. dd.}'}" />
-                        <TextBlock Text="Állapot" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding SelectedLending.Status}" />
-                        <TextBlock Text="Értesítés e-mailben" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding SelectedLending.NotifyByEmail}" />
+                        <TextBlock Text="Azonosító" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.Id}" FontSize="16" />
+                        <TextBlock Text="Könyvtári szám" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.InventoryCode}" FontSize="16" />
+                        <TextBlock Text="Felhasználó" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.UserName}" FontSize="16" />
+                        <TextBlock Text="Könyvtár" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.LibraryName}" FontSize="16" />
+                        <TextBlock Text="Könyvtáros" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.LibrarianName}" FontSize="16" />
+                        <TextBlock Text="Kölcsönzés dátuma" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.BorrowedAt, StringFormat='{}{0:yyyy. MM. dd.}'}" FontSize="16" />
+                        <TextBlock Text="Lejárati dátum" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.DueDate, StringFormat='{}{0:yyyy. MM. dd.}'}" FontSize="16" />
+                        <TextBlock Text="Visszahozva" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.ReturnedAt, StringFormat='{}{0:yyyy. MM. dd.}'}" FontSize="16" />
+                        <TextBlock Text="Állapot" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.Status}" FontSize="16" />
+                        <TextBlock Text="Értesítés e-mailben" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.NotifyByEmail}" FontSize="16" />
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Content="Szerkesztés" Click="EditSelectedLending" Margin="0,0,8,8" />
+                            <Button Content="Visszahozta" Click="ReturnSelectedLending"
+                                    Classes="primaryButton" IsEnabled="{Binding CanReturnSelectedLending}" Margin="0,0,8,8" />
+                            <Button Content="Törlés" Click="DeleteSelectedLending" Margin="0,0,8,8" />
+                        </WrapPanel>
                     </StackPanel>
                 </ScrollViewer>
             </Border>

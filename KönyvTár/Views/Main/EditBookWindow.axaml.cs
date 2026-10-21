@@ -1,5 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using System.Collections.Generic;
+using System.Linq;
 using KönyvTár.Models;
 
 namespace KönyvTár.Views.Main;
@@ -14,23 +16,29 @@ public partial class EditBookWindow : Window
         DataContext = this;
     }
 
-    public EditBookWindow(Book book) : this()
+    public EditBookWindow(Book book, IEnumerable<Book>? catalog = null) : this()
     {
-        TitleTextBox.Text = book.Title;
-        AuthorTextBox.Text = book.Author;
-        PublisherTextBox.Text = book.Publisher;
-        IsbnTextBox.Text = book.ISBN;
-        InventoryCodeTextBox.Text = book.InventoryCode;
+        var books = catalog?.ToList() ?? [book];
+        TitleAutoComplete.ItemsSource = books.Select(item => item.Title).Distinct().ToList();
+        AuthorAutoComplete.ItemsSource = books.Select(item => item.Author).Distinct().ToList();
+        PublisherAutoComplete.ItemsSource = books.Select(item => item.Publisher).Distinct().ToList();
+        IsbnAutoComplete.ItemsSource = books.Select(item => item.ISBN).Distinct().ToList();
+        InventoryCodeAutoComplete.ItemsSource = books.Select(item => item.InventoryCode).Distinct().ToList();
+        TitleAutoComplete.Text = book.Title;
+        AuthorAutoComplete.Text = book.Author;
+        PublisherAutoComplete.Text = book.Publisher;
+        IsbnAutoComplete.Text = book.ISBN;
+        InventoryCodeAutoComplete.Text = book.InventoryCode;
         _originalStatus = book.Status;
     }
 
     private void SaveButton_Click(object? sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(TitleTextBox.Text)
-            || string.IsNullOrWhiteSpace(AuthorTextBox.Text)
-            || string.IsNullOrWhiteSpace(PublisherTextBox.Text)
-            || string.IsNullOrWhiteSpace(IsbnTextBox.Text)
-            || string.IsNullOrWhiteSpace(InventoryCodeTextBox.Text))
+        if (string.IsNullOrWhiteSpace(TitleAutoComplete.Text)
+            || string.IsNullOrWhiteSpace(AuthorAutoComplete.Text)
+            || string.IsNullOrWhiteSpace(PublisherAutoComplete.Text)
+            || string.IsNullOrWhiteSpace(IsbnAutoComplete.Text)
+            || string.IsNullOrWhiteSpace(InventoryCodeAutoComplete.Text))
         {
             ValidationTextBlock.Text = "Minden mező kitöltése kötelező.";
             ValidationTextBlock.IsVisible = true;
@@ -38,12 +46,12 @@ public partial class EditBookWindow : Window
         }
 
         Close(new Book(
-            TitleTextBox.Text.Trim(),
-            AuthorTextBox.Text.Trim(),
-            PublisherTextBox.Text.Trim(),
+            TitleAutoComplete.Text.Trim(),
+            AuthorAutoComplete.Text.Trim(),
+            PublisherAutoComplete.Text.Trim(),
             _originalStatus,
-            IsbnTextBox.Text.Trim(),
-            InventoryCodeTextBox.Text.Trim()));
+            IsbnAutoComplete.Text.Trim(),
+            InventoryCodeAutoComplete.Text.Trim()));
     }
 
     private void CancelButton_Click(object? sender, RoutedEventArgs e) => Close(null);

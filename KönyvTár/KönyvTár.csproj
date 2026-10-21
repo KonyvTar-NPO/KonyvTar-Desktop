@@ -34,5 +34,8 @@
         <DependentUpon>PasswordLoginPage.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="Views\Main\EditLendingWindow.axaml.cs">
+        <DependentUpon>EditLendingWindow.axaml</DependentUpon>
+      </Compile>
     </ItemGroup>
 </Project>

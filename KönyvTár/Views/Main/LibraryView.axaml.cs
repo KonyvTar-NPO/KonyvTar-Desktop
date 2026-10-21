@@ -1,12 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using System;
-using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Linq;
 using KönyvTár.ViewModels;
 using KönyvTár.Services;
 using KönyvTár.Models;
@@ -16,18 +13,13 @@ namespace KönyvTár.Views.Main;
 public partial class LibraryView : UserControl
 {
     private MainWindowViewModel? _viewModel;
-    private bool _syncingCalendar;
+    private bool _syncingDatePickers;
 
     public LibraryView()
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
-        LendingCalendar.SelectedDates.CollectionChanged += OnCalendarSelectionChanged;
-        LendingCalendar.AddHandler(
-            InputElement.PointerWheelChangedEvent,
-            LendingCalendar_PointerWheelChanged,
-            RoutingStrategies.Tunnel,
-            handledEventsToo: true);
+        ToDatePicker.PropertyChanged += OnDatePickerPropertyChanged;
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)
@@ -39,7 +31,7 @@ public partial class LibraryView : UserControl
         if (_viewModel is not null)
         {
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;
-            SyncCalendarFromViewModel();
+            SyncDatePickersFromViewModel();
         }
     }
 
@@ -47,70 +39,56 @@ public partial class LibraryView : UserControl
     {
         if (e.PropertyName is nameof(MainWindowViewModel.FromDate)
             or nameof(MainWindowViewModel.ToDate))
-            SyncCalendarFromViewModel();
+            SyncDatePickersFromViewModel();
     }
 
-    private void OnCalendarSelectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    private void OnDatePickerPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
-        if (_syncingCalendar || _viewModel is null)
+        if (_syncingDatePickers || _viewModel is null
+            || e.Property != DatePicker.SelectedDateProperty)
             return;
 
         if (_viewModel.SelectedLendingDuration != "Egyedi")
             return;
 
-        var dates = LendingCalendar.SelectedDates.OrderBy(date => date).ToList();
-        var today = DateTimeOffset.Now.Date;
-        _syncingCalendar = true;
+        var end = ToDatePicker.SelectedDate is { } toDate
+            ? new DateTimeOffset(toDate.Date)
+            : (DateTimeOffset?)null;
+        var start = DateTimeOffset.Now.Date;
+
+        _syncingDatePickers = true;
         try
         {
-            _viewModel.FromDate = today;
-            _viewModel.ToDate = dates.Count > 0 && dates[^1] >= today
-                ? new DateTimeOffset(dates[^1])
-                : null;
+            _viewModel.FromDate = start;
+            _viewModel.ToDate = end is { } endDate && endDate < start
+                ? null
+                : end;
         }
         finally
         {
-            _syncingCalendar = false;
+            _syncingDatePickers = false;
         }
 
-        SyncCalendarFromViewModel();
+        SyncDatePickersFromViewModel();
     }
 
-    private void SyncCalendarFromViewModel()
+    private void SyncDatePickersFromViewModel()
     {
-        if (_syncingCalendar || _viewModel is null)
+        if (_syncingDatePickers || _viewModel is null)
             return;
 
-        _syncingCalendar = true;
+        _syncingDatePickers = true;
         try
         {
-            LendingCalendar.SelectedDates.Clear();
+            if (_viewModel.SelectedLendingDuration == "Egyedi")
+                _viewModel.FromDate = DateTimeOffset.Now.Date;
 
-            if (_viewModel.FromDate is not { } fromDate)
-                return;
-
-            LendingCalendar.DisplayDate = fromDate.Date;
-            if (_viewModel.ToDate is { } toDate && toDate >= fromDate)
-                LendingCalendar.SelectedDates.AddRange(fromDate.Date, toDate.Date);
-            else
-                LendingCalendar.SelectedDates.Add(fromDate.Date);
+            ToDatePicker.SelectedDate = _viewModel.ToDate?.Date;
         }
         finally
         {
-            _syncingCalendar = false;
+            _syncingDatePickers = false;
         }
-    }
-
-    private void LendingCalendar_PointerWheelChanged(object? sender, PointerWheelEventArgs e)
-    {
-        var maxOffset = Math.Max(0, DetailsScrollViewer.Extent.Height - DetailsScrollViewer.Viewport.Height);
-        var nextOffset = Math.Clamp(
-            DetailsScrollViewer.Offset.Y - e.Delta.Y * 60,
-            0,
-            maxOffset);
-
-        DetailsScrollViewer.Offset = new Vector(DetailsScrollViewer.Offset.X, nextOffset);
-        e.Handled = true;
     }
 
     private void EmptyFilterTextBox(object? sender, RoutedEventArgs e)
@@ -135,8 +113,34 @@ public partial class LibraryView : UserControl
         if (owner is null)
             return;
 
-        var editedBook = await new EditBookWindow(book).ShowDialog<Book?>(owner);
+        var editedBook = await new EditBookWindow(book, _viewModel.Books).ShowDialog<Book?>(owner);
         if (editedBook is not null)
             _viewModel.UpdateBook(book, editedBook);
+    }
+
+    private async void ReturnSelectedLending(object? sender, RoutedEventArgs e)
+    {
+        if (_viewModel is not null)
+            await _viewModel.ReturnSelectedBookLendingAsync();
+    }
+
+    private async void EditSelectedLending(object? sender, RoutedEventArgs e)
+    {
+        if (_viewModel?.SelectedBookLending is not { } lending)
+            return;
+
+        var owner = TopLevel.GetTopLevel(this) as Window;
+        if (owner is null)
+            return;
+
+        var editedLending = await new EditLendingWindow(lending, _viewModel.Users).ShowDialog<LendingRecord?>(owner);
+        if (editedLending is not null)
+            await _viewModel.UpdateLendingAsync(editedLending);
+    }
+
+    private async void DeleteSelectedLending(object? sender, RoutedEventArgs e)
+    {
+        if (_viewModel is not null)
+            await _viewModel.DeleteSelectedBookLendingAsync();
     }
 }

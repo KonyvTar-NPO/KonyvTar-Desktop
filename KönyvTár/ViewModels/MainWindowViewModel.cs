@@ -15,8 +15,6 @@ namespace KönyvTár.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    public string Greeting { get; } = "Welcome to Avalonia!";
-
     private readonly IBookService _bookService;
     private readonly IUserService _userService;
     private readonly ILendingService _lendingService;
@@ -24,6 +22,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _statusFilter = "Minden";
     private Book? _selectedBook;
     private LibraryUser? _selectedUser;
+    private string _selectedUserSearchText = string.Empty;
     private DateTimeOffset? _fromDate = DateTimeOffset.Now.Date;
     private DateTimeOffset? _toDate = DateTimeOffset.Now.Date.AddDays(1);
     private string _selectedLendingDuration = "1 nap";
@@ -75,6 +74,12 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         get => _selectedUser;
         set => SetProperty(ref _selectedUser, value);
+    }
+
+    public string SelectedUserSearchText
+    {
+        get => _selectedUserSearchText;
+        set => SetProperty(ref _selectedUserSearchText, value);
     }
 
     public DateTimeOffset? FromDate
@@ -133,10 +138,13 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(HasSelectedLending));
             OnPropertyChanged(nameof(LendingTableColumnWidth));
             OnPropertyChanged(nameof(LendingDetailsColumnWidth));
+            OnPropertyChanged(nameof(CanReturnSelectedLending));
         } }
     }
 
     public bool HasSelectedLending => SelectedLending is not null;
+
+    public bool CanReturnSelectedLending => SelectedLending is { ReturnedAt: null };
 
     public string StatusFilter
     {
@@ -153,16 +161,139 @@ public partial class MainWindowViewModel : ViewModelBase
         get => _selectedBook;
         set
         {
+            var previousInventoryCode = _selectedBook?.InventoryCode;
             if (SetProperty(ref _selectedBook, value))
             {
                 OnPropertyChanged(nameof(HasSelectedBook));
+                OnPropertyChanged(nameof(SelectedBookLending));
+                OnPropertyChanged(nameof(HasSelectedBookLending));
+                OnPropertyChanged(nameof(ShowMissingSelectedBookLending));
+                OnPropertyChanged(nameof(IsSelectedBookLent));
+                OnPropertyChanged(nameof(CanStartLending));
                 OnPropertyChanged(nameof(BookTableColumnWidth));
                 OnPropertyChanged(nameof(BookDetailsColumnWidth));
+
+                if (previousInventoryCode != value?.InventoryCode)
+                    ResetLendingInputs();
             }
         }
     }
 
+    private void ResetLendingInputs()
+    {
+        SelectedUser = null;
+        SelectedUserSearchText = string.Empty;
+        LendingStatusMessage = string.Empty;
+        SelectedLendingDuration = "1 nap";
+        FromDate = DateTimeOffset.Now.Date;
+        ToDate = FromDate?.AddDays(1);
+    }
+
     public bool HasSelectedBook => SelectedBook is not null;
+
+    public LendingRecord? SelectedBookLending => SelectedBook is { } book
+        ? Lendings.FirstOrDefault(lending => lending.InventoryCode == book.InventoryCode && lending.ReturnedAt is null)
+        : null;
+
+    public bool HasSelectedBookLending => SelectedBookLending is not null;
+
+    public bool ShowMissingSelectedBookLending => IsSelectedBookLent && !HasSelectedBookLending;
+
+    public bool IsSelectedBookLent => SelectedBook?.Status == "Kölcsönözve";
+
+    public bool CanStartLending => HasSelectedBook && !IsSelectedBookLent;
+
+    public async Task UpdateLendingAsync(LendingRecord updatedLending)
+    {
+        var index = Lendings.ToList().FindIndex(lending => lending.Id == updatedLending.Id);
+        if (index < 0)
+            return;
+
+        await _lendingService.UpdateLendingAsync(updatedLending);
+        Lendings[index] = updatedLending;
+        if (SelectedLending?.Id == updatedLending.Id)
+            SelectedLending = updatedLending;
+        RefreshFilteredLendings();
+        OnPropertyChanged(nameof(SelectedBookLending));
+        OnPropertyChanged(nameof(HasSelectedBookLending));
+        OnPropertyChanged(nameof(ShowMissingSelectedBookLending));
+        RefreshHomeSummary();
+    }
+
+    public async Task DeleteSelectedBookLendingAsync()
+    {
+        if (SelectedBookLending is { } lending)
+            await DeleteLendingAsync(lending);
+    }
+
+    public async Task DeleteLendingAsync(LendingRecord lending)
+    {
+        if (!Lendings.Any(item => item.Id == lending.Id))
+            return;
+
+        await _lendingService.DeleteLendingAsync(lending.Id);
+        Lendings.Remove(Lendings.First(item => item.Id == lending.Id));
+        MakeBookAvailableIfNoActiveLending(lending.InventoryCode);
+        if (SelectedLending?.Id == lending.Id)
+            SelectedLending = null;
+        RefreshFilteredLendings();
+        OnPropertyChanged(nameof(SelectedBookLending));
+        OnPropertyChanged(nameof(HasSelectedBookLending));
+        OnPropertyChanged(nameof(IsSelectedBookLent));
+        OnPropertyChanged(nameof(ShowMissingSelectedBookLending));
+        OnPropertyChanged(nameof(CanStartLending));
+        RefreshHomeSummary();
+    }
+
+    public async Task ReturnSelectedBookLendingAsync()
+    {
+        if (SelectedBookLending is { } lending)
+            await ReturnLendingAsync(lending);
+    }
+
+    public async Task ReturnLendingAsync(LendingRecord lending)
+    {
+        if (lending.ReturnedAt is not null || !Lendings.Any(item => item.Id == lending.Id))
+            return;
+
+        var returnedLending = lending with
+        {
+            ReturnedAt = DateTimeOffset.Now,
+            Status = "Visszahozva"
+        };
+        await _lendingService.UpdateLendingAsync(returnedLending);
+
+        var lendingIndex = Lendings.ToList().FindIndex(item => item.Id == lending.Id);
+        if (lendingIndex >= 0)
+            Lendings[lendingIndex] = returnedLending;
+        if (SelectedLending?.Id == lending.Id)
+            SelectedLending = returnedLending;
+        MakeBookAvailableIfNoActiveLending(lending.InventoryCode);
+        RefreshFilteredLendings();
+        OnPropertyChanged(nameof(SelectedBookLending));
+        OnPropertyChanged(nameof(HasSelectedBookLending));
+        OnPropertyChanged(nameof(IsSelectedBookLent));
+        OnPropertyChanged(nameof(CanStartLending));
+        OnPropertyChanged(nameof(ShowMissingSelectedBookLending));
+        RefreshHomeSummary();
+    }
+
+    private void MakeBookAvailableIfNoActiveLending(string inventoryCode)
+    {
+        if (Lendings.Any(item => item.InventoryCode == inventoryCode && item.ReturnedAt is null))
+            return;
+
+        var index = Books.ToList().FindIndex(book => book.InventoryCode == inventoryCode);
+        if (index < 0 || Books[index].Status != "Kölcsönözve")
+            return;
+
+        var availableBook = Books[index] with { Status = "Elérhető" };
+        Books[index] = availableBook;
+        if (SelectedBook?.InventoryCode == inventoryCode)
+            SelectedBook = availableBook;
+        RefreshStatusFilters();
+        RefreshFilteredBooks();
+    }
 
     public void UpdateBook(Book originalBook, Book updatedBook)
     {
@@ -180,7 +311,15 @@ public partial class MainWindowViewModel : ViewModelBase
 
         RefreshStatusFilters();
         RefreshFilteredBooks();
+        RefreshHomeSummary();
     }
+
+    public int AvailableBooksCount => Books.Count(book => book.Status == "Elérhető");
+
+    public int ActiveLendingsCount => Lendings.Count(lending => lending.ReturnedAt is null);
+
+    public int OverdueLendingsCount => Lendings.Count(lending =>
+        lending.ReturnedAt is null && lending.DueDate.Date < DateTimeOffset.Now.Date);
 
     public GridLength BookTableColumnWidth => HasSelectedBook
         ? new GridLength(3, GridUnitType.Star)
@@ -216,6 +355,14 @@ public partial class MainWindowViewModel : ViewModelBase
         _bookService = bookService;
         _userService = userService;
         _lendingService = lendingService;
+        Books.CollectionChanged += (_, _) => RefreshHomeSummary();
+        Lendings.CollectionChanged += (_, _) =>
+        {
+            RefreshHomeSummary();
+            OnPropertyChanged(nameof(SelectedBookLending));
+            OnPropertyChanged(nameof(HasSelectedBookLending));
+            OnPropertyChanged(nameof(ShowMissingSelectedBookLending));
+        };
         _ = LoadDataAsync();
     }
 
@@ -272,6 +419,21 @@ public partial class MainWindowViewModel : ViewModelBase
                 $"KOL-{Lendings.Count + 1:0000}", SelectedBook.InventoryCode, SelectedUser.Name,
                 "Központi könyvtár", "Szlonkai Benedek", FromDate.Value, ToDate.Value,
                 null, "Aktív", true));
+            var lentBook = SelectedBook with { Status = "Kölcsönözve" };
+            var bookIndex = Books.IndexOf(SelectedBook);
+            if (bookIndex >= 0)
+            {
+                Books[bookIndex] = lentBook;
+                SelectedBook = lentBook;
+                RefreshStatusFilters();
+                RefreshFilteredBooks();
+                OnPropertyChanged(nameof(SelectedBookLending));
+                OnPropertyChanged(nameof(HasSelectedBookLending));
+                OnPropertyChanged(nameof(ShowMissingSelectedBookLending));
+                OnPropertyChanged(nameof(IsSelectedBookLent));
+                OnPropertyChanged(nameof(CanStartLending));
+            }
+            RefreshHomeSummary();
             RefreshFilteredLendings();
             LendingStatusMessage = "Kölcsönzés sikeresen létrehozva.";
         }
@@ -312,6 +474,13 @@ public partial class MainWindowViewModel : ViewModelBase
 
         if (!StatusFilters.Contains(StatusFilter))
             StatusFilter = "Minden";
+    }
+
+    private void RefreshHomeSummary()
+    {
+        OnPropertyChanged(nameof(AvailableBooksCount));
+        OnPropertyChanged(nameof(ActiveLendingsCount));
+        OnPropertyChanged(nameof(OverdueLendingsCount));
     }
 
     private void RefreshFilteredLendings()

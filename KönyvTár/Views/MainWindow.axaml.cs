@@ -19,8 +19,11 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         DataContext = new MainWindowViewModel();
+        _homeView.DataContext = DataContext;
         _libraryView.DataContext = DataContext;
         _lendingsView.DataContext = DataContext;
+        _homeView.LibraryRequested += (_, _) => MainContent.Content = _libraryView;
+        _homeView.LendingsRequested += (_, _) => MainContent.Content = _lendingsView;
         MainContent.Content = _homeView;
         ThemeButton.Click += OnThemeButtonClick;
         SettingsButton.Click += OnSettingsButtonClick;

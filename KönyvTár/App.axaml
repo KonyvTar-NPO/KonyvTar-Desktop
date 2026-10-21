@@ -34,6 +34,7 @@
                     <SolidColorBrush x:Key="InputBackground" Color="#FFFFFF" />
                     <SolidColorBrush x:Key="InputBorder" Color="#CBD5E1" />
                     <SolidColorBrush x:Key="FocusBorder" Color="#2563EB" />
+                    <SolidColorBrush x:Key="TodayHighlight" Color="#F59E0B" />
                     <SolidColorBrush x:Key="PrimaryButtonText" Color="#FFFFFF"/>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
@@ -53,6 +54,7 @@
                     <SolidColorBrush x:Key="InputBackground" Color="#202633" />
                     <SolidColorBrush x:Key="InputBorder" Color="#394456" />
                     <SolidColorBrush x:Key="FocusBorder" Color="#60A5FA" />
+                    <SolidColorBrush x:Key="TodayHighlight" Color="#FBBF24" />
                     <SolidColorBrush x:Key="PrimaryButtonText" Color="#FFFFFF"/>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>

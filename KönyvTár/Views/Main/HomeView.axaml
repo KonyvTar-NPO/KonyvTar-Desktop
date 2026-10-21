@@ -1,8 +1,72 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="KönyvTár.Views.Main.HomeView">
-    sok widget egy gridben egész oldalasan megjelenítve, innen is lehet majd navigálni aloldalakra. könyvtár neve, statisztikái megjelenítve, stb.
+             xmlns:ic="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="KönyvTár.Views.Main.HomeView"
+             x:CompileBindings="False"
+             Background="{DynamicResource WindowBackground}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24" Spacing="20">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Könyvtári áttekintés" FontSize="28" FontWeight="SemiBold" />
+                <TextBlock Text="Gyors összefoglaló a könyvtár készletéről és kölcsönzéseiről."
+                           Foreground="{DynamicResource SecondaryText}" />
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                <Button Grid.Column="0" Classes="linkButton" Click="LibraryWidget_Click"
+                        HorizontalContentAlignment="Stretch" Padding="0">
+                    <Border Padding="22" MinHeight="210"
+                            Background="{DynamicResource SurfaceBackground}"
+                            BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
+                            CornerRadius="12">
+                        <StackPanel Spacing="16">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="Könyvtár" FontSize="20" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryText}" />
+                                <ic:MaterialIcon Grid.Column="1" Kind="Bookshelf" Width="24" Height="24"
+                                                 Foreground="{DynamicResource FocusBorder}" />
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="{Binding Books.Count}" FontSize="34" FontWeight="Bold"
+                                           Foreground="{DynamicResource PrimaryText}" />
+                                <TextBlock Text="könyv összesen" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource SecondaryText}" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding AvailableBooksCount} elérhető könyv"
+                                       FontSize="15" Foreground="{DynamicResource SecondaryText}" />
+                            <TextBlock Text="Könyvtár kezelése →" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource FocusBorder}" />
+                        </StackPanel>
+                    </Border>
+                </Button>
+
+                <Button Grid.Column="1" Classes="linkButton" Click="LendingsWidget_Click"
+                        HorizontalContentAlignment="Stretch" Padding="0">
+                    <Border Padding="22" MinHeight="210"
+                            Background="{DynamicResource SurfaceBackground}"
+                            BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
+                            CornerRadius="12">
+                        <StackPanel Spacing="16">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="Kölcsönzések" FontSize="20" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryText}" />
+                                <ic:MaterialIcon Grid.Column="1" Kind="CalendarClock" Width="24" Height="24"
+                                                 Foreground="{DynamicResource FocusBorder}" />
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="{Binding ActiveLendingsCount}" FontSize="34" FontWeight="Bold"
+                                           Foreground="{DynamicResource PrimaryText}" />
+                                <TextBlock Text="aktív kölcsönzés" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource SecondaryText}" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding OverdueLendingsCount} lejárt határidejű kölcsönzés"
+                                       FontSize="15" Foreground="{DynamicResource SecondaryText}" />
+                            <TextBlock Text="Kölcsönzések kezelése →" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource FocusBorder}" />
+                        </StackPanel>
+                    </Border>
+                </Button>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

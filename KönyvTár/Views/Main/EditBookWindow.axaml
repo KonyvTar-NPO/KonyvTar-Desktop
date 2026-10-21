@@ -16,23 +16,23 @@
                 <StackPanel Spacing="14">
                     <StackPanel Spacing="5">
                         <TextBlock Text="Cím" FontWeight="SemiBold" />
-                        <TextBox x:Name="TitleTextBox" />
+                        <AutoCompleteBox x:Name="TitleAutoComplete" FilterMode="Contains" MinimumPrefixLength="1" />
                     </StackPanel>
                     <StackPanel Spacing="5">
                         <TextBlock Text="Szerző" FontWeight="SemiBold" />
-                        <TextBox x:Name="AuthorTextBox" />
+                        <AutoCompleteBox x:Name="AuthorAutoComplete" FilterMode="Contains" MinimumPrefixLength="1" />
                     </StackPanel>
                     <StackPanel Spacing="5">
                         <TextBlock Text="Kiadó" FontWeight="SemiBold" />
-                        <TextBox x:Name="PublisherTextBox" />
+                        <AutoCompleteBox x:Name="PublisherAutoComplete" FilterMode="Contains" MinimumPrefixLength="1" />
                     </StackPanel>
                     <StackPanel Spacing="5">
                         <TextBlock Text="ISBN" FontWeight="SemiBold" />
-                        <TextBox x:Name="IsbnTextBox" />
+                        <AutoCompleteBox x:Name="IsbnAutoComplete" FilterMode="Contains" MinimumPrefixLength="1" />
                     </StackPanel>
                     <StackPanel Spacing="5">
                         <TextBlock Text="Leltári szám" FontWeight="SemiBold" />
-                        <TextBox x:Name="InventoryCodeTextBox" />
+                        <AutoCompleteBox x:Name="InventoryCodeAutoComplete" FilterMode="Contains" MinimumPrefixLength="1" />
                     </StackPanel>
                     <TextBlock x:Name="ValidationTextBlock"
                                Foreground="IndianRed"

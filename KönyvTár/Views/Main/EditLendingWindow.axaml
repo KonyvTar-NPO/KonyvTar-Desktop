@@ -1,0 +1,40 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="KönyvTár.Views.Main.EditLendingWindow"
+        Title="Kölcsönzés szerkesztése"
+        Width="560" Height="650" MinWidth="500" MinHeight="600"
+        WindowStartupLocation="CenterOwner" CanResize="False"
+        x:CompileBindings="False">
+    <Border Padding="24" Background="{DynamicResource WindowBackground}">
+        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="18">
+            <TextBlock Text="Kölcsönzés szerkesztése" FontSize="22" FontWeight="SemiBold" />
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+              <StackPanel Spacing="12">
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Felhasználó" FontWeight="SemiBold" />
+                    <AutoCompleteBox x:Name="UserAutoComplete" FilterMode="Contains"
+                                     MinimumPrefixLength="1" PlaceholderText="Felhasználó keresése..." />
+                </StackPanel>
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Kölcsönzés kezdete" FontWeight="SemiBold" />
+                    <DatePicker x:Name="BorrowedDatePicker"
+                                        />
+                </StackPanel>
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Lejárati dátum" FontWeight="SemiBold" />
+                    <DatePicker x:Name="DueDatePicker"
+                                        />
+                </StackPanel>
+                <CheckBox x:Name="NotifyCheckBox" Content="E-mail értesítés" />
+                <TextBlock x:Name="ValidationTextBlock" Foreground="IndianRed"
+                           TextWrapping="Wrap" IsVisible="False" />
+              </StackPanel>
+            </ScrollViewer>
+            <StackPanel Grid.Row="2" Orientation="Horizontal"
+                        HorizontalAlignment="Right" Spacing="10">
+                <Button Content="Mégse" Click="CancelButton_Click" />
+                <Button Content="Mentés" Classes="primaryButton" Click="SaveButton_Click" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
