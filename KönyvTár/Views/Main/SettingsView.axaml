@@ -2,7 +2,50 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ic="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="KönyvTár.Views.Main.SettingsView">
-    settings
+             x:Class="KönyvTár.Views.Main.SettingsView"
+             Background="{DynamicResource WindowBackground}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24" Spacing="20">
+            <StackPanel Spacing="5">
+                <TextBlock Text="Beállítások" Classes="pageTitle" />
+                <TextBlock Text="Az alkalmazás megjelenésének és működésének beállításai."
+                           Classes="pageSubtitle" />
+            </StackPanel>
+
+            <Border Classes="card" Padding="24">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                    <Border Width="44" Height="44" CornerRadius="12"
+                            Background="{DynamicResource ButtonHoverBackground}">
+                        <ic:MaterialIcon Kind="ThemeLightDark" Width="24" Height="24"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                         Foreground="{DynamicResource FocusBorder}" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Text="Megjelenés" FontSize="18" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource PrimaryText}" />
+                        <TextBlock Text="A világos és sötét mód a bal oldali menü alján váltható."
+                                   Classes="pageSubtitle" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Classes="card" Padding="24">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                    <Border Width="44" Height="44" CornerRadius="12"
+                            Background="{DynamicResource ButtonHoverBackground}">
+                        <ic:MaterialIcon Kind="Translate" Width="24" Height="24"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                         Foreground="{DynamicResource FocusBorder}" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Text="Nyelv" FontSize="18" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource PrimaryText}" />
+                        <TextBlock Text="Magyar" Classes="pageSubtitle" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

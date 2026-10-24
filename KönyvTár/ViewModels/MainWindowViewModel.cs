@@ -314,28 +314,58 @@ public partial class MainWindowViewModel : ViewModelBase
         RefreshHomeSummary();
     }
 
+    public int TotalBooksCount => Books.Count;
+
     public int AvailableBooksCount => Books.Count(book => book.Status == "Elérhető");
+
+    public int LentBooksCount => Books.Count(book => book.Status == "Kölcsönözve");
+
+    public int LibraryUtilizationPercent => TotalBooksCount == 0
+        ? 0
+        : (int)Math.Round(LentBooksCount * 100d / TotalBooksCount);
+
+    public int UsersCount => Users.Count;
+
+    public int TotalLendingsCount => Lendings.Count;
 
     public int ActiveLendingsCount => Lendings.Count(lending => lending.ReturnedAt is null);
 
     public int OverdueLendingsCount => Lendings.Count(lending =>
         lending.ReturnedAt is null && lending.DueDate.Date < DateTimeOffset.Now.Date);
 
-    public GridLength BookTableColumnWidth => HasSelectedBook
-        ? new GridLength(3, GridUnitType.Star)
-        : new GridLength(1, GridUnitType.Star);
+    public int DueTodayLendingsCount => Lendings.Count(lending =>
+        lending.ReturnedAt is null && lending.DueDate.Date == DateTimeOffset.Now.Date);
 
-    public GridLength BookDetailsColumnWidth => HasSelectedBook
-        ? new GridLength(1.5, GridUnitType.Star)
-        : new GridLength(0);
-    
-    private GridLength LendingTableColumnWidth => HasSelectedLending
-        ? new GridLength(3, GridUnitType.Star)
-        : new  GridLength(1, GridUnitType.Star);
-    
-    public GridLength LendingDetailsColumnWidth => HasSelectedLending
-        ? new GridLength(1.5, GridUnitType.Star)
-        : new GridLength(0);
+    public int DueSoonLendingsCount => Lendings.Count(lending =>
+        lending.ReturnedAt is null &&
+        lending.DueDate.Date >= DateTimeOffset.Now.Date &&
+        lending.DueDate.Date <= DateTimeOffset.Now.Date.AddDays(7));
+
+    public int ReturnedLendingsCount => Lendings.Count(lending => lending.ReturnedAt is not null);
+
+    public IReadOnlyList<Book> FeaturedBooks => Books.Take(3).ToList();
+
+    public IReadOnlyList<LendingRecord> NextDueLendings => Lendings
+        .Where(lending => lending.ReturnedAt is null)
+        .OrderBy(lending => lending.DueDate)
+        .Take(3)
+        .ToList();
+
+    public bool HasFeaturedBooks => Books.Count > 0;
+
+    public bool HasNextDueLendings => Lendings.Any(lending => lending.ReturnedAt is null);
+
+    private static readonly GridLength FullTableWidth = new(1, GridUnitType.Star);
+    private static readonly GridLength SplitTableWidth = new(3, GridUnitType.Star);
+    private static readonly GridLength DetailsWidth = new(1.5, GridUnitType.Star);
+
+    public GridLength BookTableColumnWidth => HasSelectedBook ? SplitTableWidth : FullTableWidth;
+
+    public GridLength BookDetailsColumnWidth => HasSelectedBook ? DetailsWidth : new GridLength(0);
+
+    public GridLength LendingTableColumnWidth => HasSelectedLending ? SplitTableWidth : FullTableWidth;
+
+    public GridLength LendingDetailsColumnWidth => HasSelectedLending ? DetailsWidth : new GridLength(0);
 
     public MainWindowViewModel()
         : this(new TemporaryBookService(), new TemporaryUserService(), new TemporaryLendingService())
@@ -356,6 +386,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _userService = userService;
         _lendingService = lendingService;
         Books.CollectionChanged += (_, _) => RefreshHomeSummary();
+        Users.CollectionChanged += (_, _) => RefreshHomeSummary();
         Lendings.CollectionChanged += (_, _) =>
         {
             RefreshHomeSummary();
@@ -478,9 +509,21 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void RefreshHomeSummary()
     {
+        OnPropertyChanged(nameof(TotalBooksCount));
         OnPropertyChanged(nameof(AvailableBooksCount));
+        OnPropertyChanged(nameof(LentBooksCount));
+        OnPropertyChanged(nameof(LibraryUtilizationPercent));
+        OnPropertyChanged(nameof(UsersCount));
+        OnPropertyChanged(nameof(TotalLendingsCount));
         OnPropertyChanged(nameof(ActiveLendingsCount));
         OnPropertyChanged(nameof(OverdueLendingsCount));
+        OnPropertyChanged(nameof(DueTodayLendingsCount));
+        OnPropertyChanged(nameof(DueSoonLendingsCount));
+        OnPropertyChanged(nameof(ReturnedLendingsCount));
+        OnPropertyChanged(nameof(FeaturedBooks));
+        OnPropertyChanged(nameof(NextDueLendings));
+        OnPropertyChanged(nameof(HasFeaturedBooks));
+        OnPropertyChanged(nameof(HasNextDueLendings));
     }
 
     private void RefreshFilteredLendings()

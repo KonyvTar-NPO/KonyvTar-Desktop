@@ -4,15 +4,15 @@
     <Grid RowDefinitions="*,Auto,*">
         <StackPanel Grid.Row="1" VerticalAlignment="Center" MaxWidth="300" Spacing="0">
             <TextBlock Text="E-mail ellenőrzése" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0 0 0 14"/>
-            <TextBlock Text="Írd be az e-mailben kapott 6 jegyű kódot." FontSize="14" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap" Margin="0 0 0 22"/>
-            <TextBlock x:Name="EmailText" FontSize="13" Foreground="{DynamicResource TextSecondary}" Margin="0 0 0 12"/>
+            <TextBlock Text="Írd be az e-mailben kapott 6 jegyű kódot." FontSize="14" Foreground="{DynamicResource SecondaryText}" TextWrapping="Wrap" Margin="0 0 0 22"/>
+            <TextBlock x:Name="EmailText" FontSize="13" Foreground="{DynamicResource SecondaryText}" Margin="0 0 0 12"/>
             <TextBox x:Name="CodeTextBox" MaxLength="6" PlaceholderText="123456" Classes="inputArea" TextAlignment="Left"/>
             <Button x:Name="ContinueButton" Content="Folytatás" Classes="primaryButton" />
-            <TextBlock x:Name="StatusText" Foreground="#C94C4C" FontSize="13" TextWrapping="Wrap" Margin="0 10 0 0" HorizontalAlignment="Center"/>
+            <TextBlock x:Name="StatusText" Foreground="{DynamicResource DangerText}" FontSize="13" TextWrapping="Wrap" Margin="0 10 0 0" HorizontalAlignment="Center"/>
         </StackPanel>
         <StackPanel Grid.Row="2" VerticalAlignment="Bottom" Margin="0 0 0 10">
             <Button x:Name="BackButton" Content="Vissza" Classes="linkButton" HorizontalAlignment="Center" Margin="0 0 0 10"/>
-            <TextBlock Text="© 2026 KönyvTár" HorizontalAlignment="Center" Foreground="#9AA3B5" FontSize="12"/>
+            <TextBlock Text="© 2026 KönyvTár" HorizontalAlignment="Center" Foreground="{DynamicResource SecondaryText}" FontSize="12"/>
         </StackPanel>
     </Grid>
 </UserControl>

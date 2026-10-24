@@ -8,7 +8,9 @@
         x:Class="KönyvTár.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="KönyvTár">
+        Title="KönyvTár"
+        Width="1280" Height="820" MinWidth="820" MinHeight="600"
+        WindowStartupLocation="CenterScreen">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -16,22 +18,26 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <DrawerPage DrawerLength="250" CompactDrawerLength="40" x:Name="myDrawerPage" DrawerLayoutBehavior="CompactInline">
+    <DrawerPage DrawerLength="220" CompactDrawerLength="40" x:Name="myDrawerPage"
+                DrawerLayoutBehavior="CompactInline"
+                DrawerBackground="{DynamicResource SurfaceBackground}">
         <DrawerPage.DrawerIcon>
-            <ic:MaterialIconExt Kind="HamburgerMenu" IconSize="18" />
+            <ic:MaterialIconExt Kind="HamburgerMenu" IconSize="18"/>
         </DrawerPage.DrawerIcon>
 
         <DrawerPage.DrawerHeader>
         </DrawerPage.DrawerHeader>
 
         <DrawerPage.Drawer>
-            <Grid RowDefinitions="Auto Auto Auto *" Margin="0">
+            <Grid RowDefinitions="Auto Auto Auto *" RowSpacing="4" Margin="0"
+                  Background="{DynamicResource SurfaceBackground}">
                 <Button Classes="drawerButton" Grid.Row="0" Click="HomeButton_Click">
                     <Grid ColumnDefinitions="40 *" Margin="0">
                         <Border Grid.Column="0" ToolTip.Tip="Kezdőlap">
                             <ic:MaterialIconExt Kind="HomeVariant" IconSize="18"/>
                         </Border>
-                        <TextBlock Grid.Column="1" Text="Kezdőlap" IsVisible="{Binding #myDrawerPage.IsOpen}"/>
+                        <TextBlock Grid.Column="1" Text="Kezdőlap" VerticalAlignment="Center"
+                                   IsVisible="{Binding #myDrawerPage.IsOpen}"/>
                     </Grid>
                 </Button>
                 <Button Classes="drawerButton" Grid.Row="1" Click="LibraryButton_Click">
@@ -39,7 +45,8 @@
                         <Border Grid.Column="0" ToolTip.Tip="Könyvtár kezelése">
                             <ic:MaterialIconExt Kind="Bookshelf" IconSize="18" />
                         </Border>
-                        <TextBlock Grid.Column="1" Text="Könyvtár kezelése" IsVisible="{Binding #myDrawerPage.IsOpen}"/>
+                        <TextBlock Grid.Column="1" Text="Könyvtár kezelése" VerticalAlignment="Center"
+                                   IsVisible="{Binding #myDrawerPage.IsOpen}"/>
                     </Grid>
                 </Button>
                 <Button Classes="drawerButton" Grid.Row="2" Click="LendingsButton_Click">
@@ -47,17 +54,18 @@
                         <Border Grid.Column="0" ToolTip.Tip="Kölcsönzések kezelése">
                             <ic:MaterialIconExt Kind="CalendarClock" IconSize="18" />
                         </Border>
-                        <TextBlock Grid.Column="1" Text="Kölcsönzések kezelése" IsVisible="{Binding #myDrawerPage.IsOpen}"/>
+                        <TextBlock Grid.Column="1" Text="Kölcsönzések kezelése" VerticalAlignment="Center"
+                                   IsVisible="{Binding #myDrawerPage.IsOpen}"/>
                     </Grid>
                 </Button>
-                <Button Grid.Row="3" Background="{DynamicResource FocusBorder}" VerticalAlignment="Bottom" Classes="drawerButton" Click="ProfileButton_Click">
-                    <Grid ColumnDefinitions="40 *" VerticalAlignment="Bottom" Margin="0" Height="40">
-                        <Border Grid.Column="0" >
+                <Button Grid.Row="3" VerticalAlignment="Bottom" Classes="drawerButton" Click="ProfileButton_Click">
+                    <Grid ColumnDefinitions="40 *" VerticalAlignment="Center" Margin="0">
+                        <Border Grid.Column="0">
                             <ic:MaterialIconExt Kind="AccountCircle" IconSize="18"/>
                         </Border>
                         <StackPanel Grid.Column="1" IsVisible="{Binding #myDrawerPage.IsOpen}" VerticalAlignment="Center">
                             <TextBlock Text="Szlonkai Benedek" Foreground="{DynamicResource PrimaryText}" FontSize="14"/>
-                            <TextBlock Text="szlonkaibenedek@gmail.com" FontSize="10"/>
+                            <TextBlock Text="szlonkaibenedek@gmail.com" Foreground="{DynamicResource SecondaryText}" FontSize="11"/>
                         </StackPanel>
                     </Grid>
                 </Button>
@@ -65,25 +73,26 @@
         </DrawerPage.Drawer>
 
         <DrawerPage.DrawerFooter>
-            <Grid Background="Transparent" Margin="0 5 5 5">
-                <Button Classes="linkButton">
+            <StackPanel Margin="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
+                <Button Classes="drawerButton">
                     <Grid ColumnDefinitions="40 *">
-                        <Border Grid.Column="0" Margin="0">
+                        <Border Grid.Column="0" Width="40">
                             <ic:MaterialIconExt Kind="Logout" IconSize="18"/>
                         </Border>
-                        <TextBlock Grid.Column="1" Text="Kijelentkezés" IsVisible="{Binding #myDrawerPage.IsOpen}"/>
+                        <TextBlock Grid.Column="1" Text="Kijelentkezés" VerticalAlignment="Center" TextAlignment="Center"
+                                   IsVisible="{Binding #myDrawerPage.IsOpen}" Margin="0 0 10 0"/>
                     </Grid>
                 </Button>
-                <Button x:Name="ThemeButton" Classes="ModeSwitcher" ToolTip.Tip="Váltás sötét/világos mód között"
-                        Background="Transparent" Foreground="{DynamicResource TextPrimary}"
-                        HorizontalAlignment="Right" IsVisible="{Binding #myDrawerPage.IsOpen}"
-                        Margin="0,0,0,0" Padding="2" ZIndex="10" >
+                <Button x:Name="ThemeButton" Grid.Column="1" Classes="iconButton" CornerRadius="0"
+                        ToolTip.Tip="Váltás sötét/világos mód között"
+                        IsVisible="{Binding #myDrawerPage.IsOpen}">
                     <ic:MaterialIcon x:Name="ThemeIcon" Kind="MoonWaningCrescent" Width="16" Height="16"/>
                 </Button>
-                <Button x:Name="SettingsButton" Content="{ic:MaterialIconExt Settings}"
-                        HorizontalAlignment="Right" Margin="0 0 40 0"
+                <Button x:Name="SettingsButton" Grid.Column="2" Classes="iconButton" CornerRadius="0"
+                        Content="{ic:MaterialIconExt Settings}"
+                        ToolTip.Tip="Beállítások"
                         IsVisible="{Binding #myDrawerPage.IsOpen}"/>
-            </Grid>
+            </StackPanel>
         </DrawerPage.DrawerFooter>
 
         <ContentControl x:Name="MainContent" />

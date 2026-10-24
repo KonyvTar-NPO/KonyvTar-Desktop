@@ -4,66 +4,259 @@
              x:Class="KönyvTár.Views.Main.HomeView"
              x:CompileBindings="False"
              Background="{DynamicResource WindowBackground}">
+    <UserControl.Styles>
+        <Style Selector="Button.widgetButton">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style Selector="Button.widgetButton:pointerover Border.widgetCard">
+            <Setter Property="Background" Value="{DynamicResource InputHoverBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource FocusBorder}"/>
+        </Style>
+        <Style Selector="Border.statTile">
+            <Setter Property="Background" Value="{DynamicResource SurfaceMutedBackground}"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="MinHeight" Value="64"/>
+        </Style>
+        <Style Selector="TextBlock.statLabel">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryText}"/>
+        </Style>
+        <Style Selector="TextBlock.statValue">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryText}"/>
+        </Style>
+        <Style Selector="TextBlock.sectionTitle">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryText}"/>
+        </Style>
+    </UserControl.Styles>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="24" Spacing="20">
-            <StackPanel Spacing="4">
-                <TextBlock Text="Könyvtári áttekintés" FontSize="28" FontWeight="SemiBold" />
+        <StackPanel x:Name="PageContent" Margin="24" Spacing="24">
+            <StackPanel Spacing="5">
+                <TextBlock x:Name="PageTitle" Text="Könyvtári áttekintés" Classes="pageTitle" />
                 <TextBlock Text="Gyors összefoglaló a könyvtár készletéről és kölcsönzéseiről."
-                           Foreground="{DynamicResource SecondaryText}" />
+                           Classes="pageSubtitle" />
             </StackPanel>
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
-                <Button Grid.Column="0" Classes="linkButton" Click="LibraryWidget_Click"
-                        HorizontalContentAlignment="Stretch" Padding="0">
-                    <Border Padding="22" MinHeight="210"
-                            Background="{DynamicResource SurfaceBackground}"
-                            BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                            CornerRadius="12">
-                        <StackPanel Spacing="16">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="Könyvtár" FontSize="20" FontWeight="SemiBold"
+            <Grid x:Name="WidgetGrid" ColumnDefinitions="*,*" ColumnSpacing="20" RowSpacing="20">
+                <Button x:Name="LibraryWidget" Grid.Column="0" Classes="linkButton widgetButton"
+                        Click="LibraryWidget_Click">
+                    <Border Classes="card widgetCard" Padding="28" MinHeight="480">
+                        <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="20">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                <Border Width="48" Height="48" CornerRadius="14"
+                                        Background="{DynamicResource ButtonHoverBackground}">
+                                    <ic:MaterialIcon Kind="Bookshelf" Width="26" Height="26"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource FocusBorder}" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock Text="Könyvtár" FontSize="22" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource PrimaryText}" />
+                                    <TextBlock Text="Teljes készlet és elérhetőség" FontSize="13"
+                                               Foreground="{DynamicResource SecondaryText}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="14">
+                                <TextBlock Text="{Binding TotalBooksCount}" FontSize="56" FontWeight="Bold"
                                            Foreground="{DynamicResource PrimaryText}" />
-                                <ic:MaterialIcon Grid.Column="1" Kind="Bookshelf" Width="24" Height="24"
+                                <StackPanel VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock Text="könyv összesen" FontSize="16" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource PrimaryText}" />
+                                    <TextBlock FontSize="13" Foreground="{DynamicResource SecondaryText}"
+                                               Text="{Binding AvailableBooksCount, StringFormat='{}{0} elérhető a polcokon'}" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <Grid Grid.Row="2" RowDefinitions="Auto,Auto" ColumnDefinitions="*,*"
+                                  RowSpacing="10" ColumnSpacing="10">
+                                <Border Grid.Row="0" Grid.Column="0" Classes="statTile">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Elérhető" Classes="statLabel" />
+                                        <TextBlock Text="{Binding AvailableBooksCount}" Classes="statValue"
+                                                   Foreground="{DynamicResource SuccessText}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="1" Classes="statTile">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Kölcsönözve" Classes="statLabel" />
+                                        <TextBlock Text="{Binding LentBooksCount}" Classes="statValue"
+                                                   Foreground="{DynamicResource WarningText}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="0" Classes="statTile">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Kihasználtság" Classes="statLabel" />
+                                        <TextBlock Text="{Binding LibraryUtilizationPercent, StringFormat='{}{0}%'}"
+                                                   Classes="statValue" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="1" Classes="statTile">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Olvasók" Classes="statLabel" />
+                                        <TextBlock Text="{Binding UsersCount}" Classes="statValue" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <StackPanel Grid.Row="3" Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="Készlet áttekintés" Classes="sectionTitle" />
+                                    <TextBlock Grid.Column="1" Text="Első 3 könyv" FontSize="12"
+                                               Foreground="{DynamicResource SecondaryText}" />
+                                </Grid>
+                                <Border Height="1" Background="{DynamicResource BorderColor}" />
+                                <ItemsControl ItemsSource="{Binding FeaturedBooks}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="0,7">
+                                                <StackPanel Spacing="1">
+                                                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource PrimaryText}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding Author}" FontSize="12"
+                                                               Foreground="{DynamicResource SecondaryText}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+                                                <Border Grid.Column="1" Padding="8,3" CornerRadius="999"
+                                                        VerticalAlignment="Center"
+                                                        Background="{DynamicResource SurfaceMutedBackground}">
+                                                    <TextBlock Text="{Binding Status}" FontSize="11"
+                                                               Foreground="{DynamicResource SecondaryText}" />
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="Nincs megjeleníthető könyv." FontSize="13"
+                                           Foreground="{DynamicResource SecondaryText}"
+                                           IsVisible="{Binding !HasFeaturedBooks}" />
+                            </StackPanel>
+
+                            <Grid Grid.Row="4" ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                                <TextBlock Text="Könyvtár kezelése" FontSize="15" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource FocusBorder}" />
+                                <ic:MaterialIcon Grid.Column="1" Kind="ArrowRight" Width="20" Height="20"
                                                  Foreground="{DynamicResource FocusBorder}" />
                             </Grid>
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="{Binding Books.Count}" FontSize="34" FontWeight="Bold"
-                                           Foreground="{DynamicResource PrimaryText}" />
-                                <TextBlock Text="könyv összesen" VerticalAlignment="Center"
-                                           Foreground="{DynamicResource SecondaryText}" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding AvailableBooksCount} elérhető könyv"
-                                       FontSize="15" Foreground="{DynamicResource SecondaryText}" />
-                            <TextBlock Text="Könyvtár kezelése →" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource FocusBorder}" />
-                        </StackPanel>
+                        </Grid>
                     </Border>
                 </Button>
 
-                <Button Grid.Column="1" Classes="linkButton" Click="LendingsWidget_Click"
-                        HorizontalContentAlignment="Stretch" Padding="0">
-                    <Border Padding="22" MinHeight="210"
-                            Background="{DynamicResource SurfaceBackground}"
-                            BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
-                            CornerRadius="12">
-                        <StackPanel Spacing="16">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="Kölcsönzések" FontSize="20" FontWeight="SemiBold"
+                <Button x:Name="LendingsWidget" Grid.Column="1" Classes="linkButton widgetButton"
+                        Click="LendingsWidget_Click">
+                    <Border Classes="card widgetCard" Padding="28" MinHeight="480">
+                        <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="20">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                <Border Width="48" Height="48" CornerRadius="14"
+                                        Background="{DynamicResource ButtonHoverBackground}">
+                                    <ic:MaterialIcon Kind="CalendarClock" Width="26" Height="26"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource FocusBorder}" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock Text="Kölcsönzések" FontSize="22" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource PrimaryText}" />
+                                    <TextBlock Text="Aktív, lejárt és visszahozott kölcsönzések" FontSize="13"
+                                               Foreground="{DynamicResource SecondaryText}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="14">
+                                <TextBlock Text="{Binding ActiveLendingsCount}" FontSize="56" FontWeight="Bold"
                                            Foreground="{DynamicResource PrimaryText}" />
-                                <ic:MaterialIcon Grid.Column="1" Kind="CalendarClock" Width="24" Height="24"
+                                <StackPanel VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock Text="aktív kölcsönzés" FontSize="16" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource PrimaryText}" />
+                                    <TextBlock FontSize="13" Foreground="{DynamicResource SecondaryText}"
+                                               Text="{Binding TotalLendingsCount, StringFormat='{}{0} kölcsönzés összesen'}" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <Grid Grid.Row="2" RowDefinitions="Auto,Auto" ColumnDefinitions="*,*"
+                                  RowSpacing="10" ColumnSpacing="10">
+                                <Border Grid.Row="0" Grid.Column="0" Classes="statTile">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Lejárt" Classes="statLabel" />
+                                        <TextBlock Text="{Binding OverdueLendingsCount}" Classes="statValue"
+                                                   Foreground="{DynamicResource DangerText}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="1" Classes="statTile">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="7 napon belül" Classes="statLabel" />
+                                        <TextBlock Text="{Binding DueSoonLendingsCount}" Classes="statValue"
+                                                   Foreground="{DynamicResource WarningText}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="0" Classes="statTile">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Ma jár le" Classes="statLabel" />
+                                        <TextBlock Text="{Binding DueTodayLendingsCount}" Classes="statValue"
+                                                   Foreground="{DynamicResource FocusBorder}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="1" Classes="statTile">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Visszahozva" Classes="statLabel" />
+                                        <TextBlock Text="{Binding ReturnedLendingsCount}" Classes="statValue"
+                                                   Foreground="{DynamicResource SuccessText}" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <StackPanel Grid.Row="3" Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="Következő határidők" Classes="sectionTitle" />
+                                    <TextBlock Grid.Column="1" Text="Legközelebbi 3" FontSize="12"
+                                               Foreground="{DynamicResource SecondaryText}" />
+                                </Grid>
+                                <Border Height="1" Background="{DynamicResource BorderColor}" />
+                                <ItemsControl ItemsSource="{Binding NextDueLendings}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="0,7">
+                                                <StackPanel Spacing="1">
+                                                    <TextBlock Text="{Binding UserName}" FontSize="14" FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource PrimaryText}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding InventoryCode}" FontSize="12"
+                                                               Foreground="{DynamicResource SecondaryText}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                                    <TextBlock Text="{Binding DueDate, StringFormat='{}{0:yyyy. MM. dd.}'}"
+                                                               FontSize="12" FontWeight="SemiBold"
+                                                               HorizontalAlignment="Right"
+                                                               Foreground="{DynamicResource PrimaryText}" />
+                                                    <TextBlock Text="{Binding Status}" FontSize="11"
+                                                               HorizontalAlignment="Right"
+                                                               Foreground="{DynamicResource SecondaryText}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="Nincs aktív kölcsönzés." FontSize="13"
+                                           Foreground="{DynamicResource SecondaryText}"
+                                           IsVisible="{Binding !HasNextDueLendings}" />
+                            </StackPanel>
+
+                            <Grid Grid.Row="4" ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                                <TextBlock Text="Kölcsönzések kezelése" FontSize="15" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource FocusBorder}" />
+                                <ic:MaterialIcon Grid.Column="1" Kind="ArrowRight" Width="20" Height="20"
                                                  Foreground="{DynamicResource FocusBorder}" />
                             </Grid>
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="{Binding ActiveLendingsCount}" FontSize="34" FontWeight="Bold"
-                                           Foreground="{DynamicResource PrimaryText}" />
-                                <TextBlock Text="aktív kölcsönzés" VerticalAlignment="Center"
-                                           Foreground="{DynamicResource SecondaryText}" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding OverdueLendingsCount} lejárt határidejű kölcsönzés"
-                                       FontSize="15" Foreground="{DynamicResource SecondaryText}" />
-                            <TextBlock Text="Kölcsönzések kezelése →" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource FocusBorder}" />
-                        </StackPanel>
+                        </Grid>
                     </Border>
                 </Button>
             </Grid>

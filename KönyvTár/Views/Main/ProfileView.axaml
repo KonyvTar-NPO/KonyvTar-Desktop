@@ -2,7 +2,42 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ic="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="KönyvTár.Views.Main.ProfileView">
-    profile
+             x:Class="KönyvTár.Views.Main.ProfileView"
+             Background="{DynamicResource WindowBackground}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24" Spacing="20">
+            <StackPanel Spacing="5">
+                <TextBlock Text="Profil" Classes="pageTitle" />
+                <TextBlock Text="Személyes adatok és fiókinformációk."
+                           Classes="pageSubtitle" />
+            </StackPanel>
+
+            <Border Classes="card" Padding="24">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                    <Border Width="56" Height="56" CornerRadius="28"
+                            Background="{DynamicResource ButtonHoverBackground}">
+                        <ic:MaterialIcon Kind="AccountCircle" Width="30" Height="30"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                         Foreground="{DynamicResource FocusBorder}" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                        <TextBlock Text="Szlonkai Benedek" FontSize="20" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource PrimaryText}" />
+                        <TextBlock Text="szlonkaibenedek@gmail.com" Classes="pageSubtitle" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Classes="card" Padding="24">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Fiókadatok" FontSize="18" FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryText}" />
+                    <TextBlock Text="A profil szerkesztési lehetőségei hamarosan elérhetők."
+                               Classes="pageSubtitle" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

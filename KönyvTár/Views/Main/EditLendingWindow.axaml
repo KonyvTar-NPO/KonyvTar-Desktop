@@ -26,13 +26,13 @@
                                         />
                 </StackPanel>
                 <CheckBox x:Name="NotifyCheckBox" Content="E-mail értesítés" />
-                <TextBlock x:Name="ValidationTextBlock" Foreground="IndianRed"
+                <TextBlock x:Name="ValidationTextBlock" Foreground="{DynamicResource DangerText}"
                            TextWrapping="Wrap" IsVisible="False" />
               </StackPanel>
             </ScrollViewer>
             <StackPanel Grid.Row="2" Orientation="Horizontal"
                         HorizontalAlignment="Right" Spacing="10">
-                <Button Content="Mégse" Click="CancelButton_Click" />
+                <Button Content="Mégse" Click="CancelButton_Click" Classes="secondaryButton" />
                 <Button Content="Mentés" Classes="primaryButton" Click="SaveButton_Click" />
             </StackPanel>
         </Grid>

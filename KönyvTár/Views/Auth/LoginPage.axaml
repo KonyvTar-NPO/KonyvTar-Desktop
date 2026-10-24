@@ -3,7 +3,7 @@
              x:Class="KönyvTár.Views.Auth.LoginPage">
     <Grid RowDefinitions="Auto,*,Auto">
         <StackPanel Grid.Row="0" VerticalAlignment="Center" MaxWidth="300" Spacing="0">
-            <TextBlock Text="Bejelentkezés" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0 50 0 30"/>
+            <TextBlock Text="Bejelentkezés" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0 50 0 30"/>
             <ToggleButton x:Name="LoginMethodToggle"
                           IsChecked="False"
                           HorizontalAlignment="Center"
