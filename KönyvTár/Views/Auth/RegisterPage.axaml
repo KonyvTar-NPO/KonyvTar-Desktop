@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="KönyvTár.Views.Auth.RegisterPage">
+    <Grid MaxWidth="620" HorizontalAlignment="Center" RowDefinitions="Auto * Auto">
+            <StackPanel Grid.Row="0">
+                <TextBlock Text="Regisztráció" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Left" Margin="160 50 0 30"/>
+                <ToggleButton x:Name="AccountTypeToggle"
+                              IsChecked="False"
+                              HorizontalAlignment="Center"
+                              Margin="0,0,0,12"
+                              Classes="accountTypeToggle">
+                    <Grid ColumnDefinitions="*,*">
+                        <TextBlock Grid.Column="0" Text="Felhasználó" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="Könyvtáros" HorizontalAlignment="Center"/>
+                    </Grid>
+                </ToggleButton>
+            </StackPanel>
+
+            <Grid Grid.Row="1" ColumnDefinitions="300,300" RowDefinitions="Auto Auto" ColumnSpacing="20" >
+                <StackPanel Grid.Column="0" Spacing="12" Grid.Row="0">
+                    <StackPanel Spacing="0">
+                        <TextBlock Text="Vezetéknév" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        <TextBox x:Name="LastNameTextBox" Margin="0,4,0,0" Classes="inputArea"/>
+                    </StackPanel>
+                    <StackPanel Spacing="0">
+                        <TextBlock Text="Keresztnév" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        <TextBox x:Name="FirstNameTextBox" Margin="0,4,0,0" Classes="inputArea"/>
+                    </StackPanel>
+                    <StackPanel Spacing="0">
+                        <TextBlock Text="E-mail cím" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        <TextBox x:Name="EmailTextBox" Margin="0,4,0,0" Classes="inputArea"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="12" Grid.Row="0">
+                    <StackPanel Spacing="0">
+                    <TextBlock Text="Jelszó" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                    <TextBox x:Name="PasswordTextBox" PasswordChar="•" Margin="0,4,0,0" Classes="inputArea"/>
+                    </StackPanel>
+                    <StackPanel Spacing="0">
+                    <TextBlock Text="Jelszó megerősítése" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                    <TextBox x:Name="ConfirmPasswordTextBox" PasswordChar="•" Margin="0,4,0,0" Classes="inputArea"/>
+                    </StackPanel>
+                    <StackPanel x:Name="LibrarySection" IsVisible="False" Spacing="0">
+                        <TextBlock Text="Munkahelyi könyvtár" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        <ComboBox x:Name="LibraryComboBox" SelectedIndex="0" Margin="0,4,0,0" Height="48" FontSize="15">
+                            <ComboBoxItem Content="Könyvtárak később lesznek elérhetők" IsEnabled="False"/>
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical">
+                    <Button x:Name="RegisterButton" Content="Regisztráció" Classes="primaryButton"
+                            Width="300" HorizontalAlignment="Center" Margin="0,12,0,0" />
+                    <TextBlock x:Name="StatusText" Foreground="{DynamicResource DangerText}" FontSize="13" TextWrapping="Wrap" Margin="0 6 0 0" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Grid.Row="2" Margin="0 0 0 10">
+                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Spacing="5" Margin="0 0 0 5">
+                    <TextBlock Text="Van már fiókod?" Foreground="{DynamicResource SecondaryText}" VerticalAlignment="Center"/>
+                    <Button x:Name="BackButton" Content="Bejelentkezés" Classes="linkButton"/>
+                </StackPanel>
+                <TextBlock Text="© 2026 KönyvTár" HorizontalAlignment="Center" Foreground="{DynamicResource SecondaryText}" FontSize="12"/>
+            </StackPanel>
+    </Grid>
+</UserControl>

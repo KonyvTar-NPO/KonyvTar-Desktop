@@ -1,0 +1,121 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ic="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d"
+             x:CompileBindings="False"
+             x:Class="KönyvTár.Views.Main.LendingsView"
+             Background="{DynamicResource WindowBackground}">
+    <Grid RowDefinitions="Auto,Auto,*" RowSpacing="20" Margin="24">
+        <StackPanel Grid.Row="0" Spacing="5">
+            <TextBlock Text="Kölcsönzések kezelése" Classes="pageTitle" />
+            <TextBlock Text="Aktív, lejárt és visszahozott kölcsönzések áttekintése."
+                       Classes="pageSubtitle" />
+        </StackPanel>
+
+        <Border Grid.Row="1" Classes="card" Padding="16">
+            <Grid ColumnDefinitions="2*,Auto" ColumnSpacing="12">
+                <TextBox Text="{Binding LendingSearchText, Mode=TwoWay}" x:Name="FilterTextBox"
+                         PlaceholderText="Keresés kölcsönzés, könyvtári szám vagy felhasználó alapján..." >
+                    <TextBox.InnerRightContent>
+                        <Button Classes="linkButton" Click="EmptyFilterTextBox" Padding="0 0 10 0">
+                            <ic:MaterialIcon Kind="Close"/>
+                        </Button>
+                    </TextBox.InnerRightContent>
+                </TextBox>
+                <ComboBox Grid.Column="1" Width="180" ItemsSource="{Binding LendingStatusFilters}"
+                          SelectedItem="{Binding LendingStatusFilter, Mode=TwoWay}" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2" ColumnSpacing="16" RowDefinitions="* Auto">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{Binding LendingTableColumnWidth}" />
+                <ColumnDefinition Width="{Binding LendingDetailsColumnWidth}" />
+            </Grid.ColumnDefinitions>
+            <Grid RowSpan="2">
+                <TableView Grid.Column="0" ItemsSource="{Binding FilteredLendings}"
+                           SelectedItem="{Binding SelectedLending, Mode=TwoWay}"
+                           SelectionMode="Toggle" CanUserResizeColumns="False" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                    <TableView.Resources>
+                        <ResourceDictionary>
+                            <ResourceDictionary.ThemeDictionaries>
+                                <ResourceDictionary x:Key="Light">
+                                    <SolidColorBrush x:Key="SystemControlBackgroundChromeMediumBrush" Color="#E2E8F0" />
+                                </ResourceDictionary>
+                                <ResourceDictionary x:Key="Dark">
+                                    <SolidColorBrush x:Key="SystemControlBackgroundChromeMediumBrush" Color="#2E3748" />
+                                </ResourceDictionary>
+                            </ResourceDictionary.ThemeDictionaries>
+                        </ResourceDictionary>
+                    </TableView.Resources>
+                    <TableView.Columns>
+                        <TableViewColumn Header="Cím" Binding="{Binding Title}" Width="*" />
+                        <TableViewColumn Header="Szerző" Binding="{Binding Author}" Width="*" />
+                        <TableViewColumn Header="Kiadó" Binding="{Binding Publisher}" Width="*" />
+                        <TableViewColumn Header="Könyvtári szám" Binding="{Binding InventoryCode}" Width="1.3*" />
+                        <TableViewColumn Header="Felhasználó" Binding="{Binding UserName}" Width="1.5*" />
+                        <TableViewColumn Header="Határidő" Binding="{Binding DueDate, StringFormat='{}{0:yyyy. MM. dd.}'}" Width="1.3*" />
+                        <TableViewColumn Header="Állapot" Binding="{Binding Status}" Width="1.1*" />
+                    </TableView.Columns>
+                </TableView>
+            </Grid>
+
+            <Border Grid.Column="1" Grid.Row="0" Padding="20" IsVisible="{Binding HasSelectedLending}"
+                    Classes="card">
+                <ScrollViewer x:Name="DetailsScrollViewer" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="12">
+                        <Grid HorizontalAlignment="Stretch">
+                            <TextBlock Text="Kölcsönzés adatai" FontSize="20" FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Classes="iconButton" Click="EditSelectedLending">
+                                <ic:MaterialIcon Kind="Pencil" />
+                            </Button>
+                        </Grid>
+                        <Border Height="1" Background="{DynamicResource BorderColor}" />
+                        <TextBlock Text="Cím" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.Title}" FontSize="16" />
+                        <TextBlock Text="Szerző" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.Author}" FontSize="16" />
+                        <TextBlock Text="Kiadó" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.Publisher}" FontSize="16" />
+                        <TextBlock Text="Könyvtári szám" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.InventoryCode}" FontSize="16" />
+                        <TextBlock Text="Felhasználó" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.UserName}" FontSize="16" />
+                        <TextBlock Text="Könyvtár" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.LibraryName}" FontSize="16" />
+                        <TextBlock Text="Könyvtáros" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.LibrarianName}" FontSize="16" />
+                        <TextBlock Text="Kölcsönzés dátuma" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.BorrowedAt, StringFormat='{}{0:yyyy. MM. dd.}'}" FontSize="16" />
+                        <TextBlock Text="Lejárati dátum" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.DueDate, StringFormat='{}{0:yyyy. MM. dd.}'}" FontSize="16" />
+                        <TextBlock Text="Visszahozva" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.ReturnedAt, StringFormat='{}{0:yyyy. MM. dd.}'}" FontSize="16" />
+                        <TextBlock Text="Állapot" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.Status}" FontSize="16" />
+                        <TextBlock Text="Értesítés e-mailben" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryText}" />
+                        <TextBlock Text="{Binding SelectedLending.NotifyByEmail}" FontSize="16" />
+
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+            <Border Grid.Column="1" Grid.Row="1" Margin="0, 10 0 0">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Szerkesztés" Click="EditSelectedLending"
+                            Classes="secondaryButton panelButton" />
+                    <Button Content="Visszahozta" Click="ReturnSelectedLending"
+                            Classes="primaryButton panelButton"
+                            IsEnabled="{Binding CanReturnSelectedLending}" />
+                    <Button Content="Törlés" Click="DeleteSelectedLending"
+                            Classes="secondaryButton panelButton"
+                            Foreground="{DynamicResource DangerText}"
+                            IsVisible="{Binding CanDeleteLending}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

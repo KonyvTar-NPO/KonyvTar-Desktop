@@ -1,0 +1,52 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="KönyvTár.Views.Main.EditBookWindow"
+        Title="Könyv adatainak szerkesztése"
+        Width="520" Height="620"
+        MinWidth="420" MinHeight="500"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        x:CompileBindings="False">
+    <Border Padding="24" Background="{DynamicResource WindowBackground}">
+        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="20">
+            <TextBlock Text="Könyv adatainak szerkesztése"
+                       FontSize="22" FontWeight="SemiBold" />
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="14">
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Cím" FontWeight="SemiBold" />
+                        <AutoCompleteBox x:Name="TitleAutoComplete" FilterMode="Contains" MinimumPrefixLength="1" />
+                    </StackPanel>
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Szerző" FontWeight="SemiBold" />
+                        <AutoCompleteBox x:Name="AuthorAutoComplete" FilterMode="Contains" MinimumPrefixLength="1" />
+                    </StackPanel>
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Kiadó" FontWeight="SemiBold" />
+                        <AutoCompleteBox x:Name="PublisherAutoComplete" FilterMode="Contains" MinimumPrefixLength="1" />
+                    </StackPanel>
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="ISBN" FontWeight="SemiBold" />
+                        <AutoCompleteBox x:Name="IsbnAutoComplete" FilterMode="Contains" MinimumPrefixLength="1" />
+                    </StackPanel>
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Leltári szám" FontWeight="SemiBold" />
+                        <AutoCompleteBox x:Name="InventoryCodeAutoComplete" FilterMode="Contains" MinimumPrefixLength="1" />
+                    </StackPanel>
+                    <TextBlock x:Name="ValidationTextBlock"
+                               Foreground="{DynamicResource DangerText}"
+                               TextWrapping="Wrap"
+                               IsVisible="False" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal"
+                        HorizontalAlignment="Right" Spacing="10">
+                <Button Content="Mégse" Click="CancelButton_Click" Classes="secondaryButton" />
+                <Button Content="Mentés" Classes="primaryButton"
+                        Click="SaveButton_Click" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
