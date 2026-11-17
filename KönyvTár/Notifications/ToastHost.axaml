@@ -1,0 +1,64 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ic="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="KönyvTár.Notifications.ToastHost"
+             x:CompileBindings="False"
+             HorizontalAlignment="Right"
+             VerticalAlignment="Top"
+             Margin="16">
+    <ItemsControl x:Name="ToastItems" MaxWidth="420">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <StackPanel Spacing="10" />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <Border Width="380"
+                        Background="{Binding BackgroundBrush}"
+                        BorderBrush="{Binding BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        ClipToBounds="True"
+                        BoxShadow="0 10 28 0 #33000000">
+                    <Grid RowDefinitions="Auto,4">
+                        <Grid ColumnDefinitions="4,*">
+                            <Border Background="{Binding AccentBrush}" />
+                            <Grid Grid.Column="1" RowDefinitions="Auto,Auto,Auto" Margin="14,12,10,0">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                    <ic:MaterialIcon Kind="{Binding Icon}" Width="20" Height="20"
+                                                     VerticalAlignment="Center"
+                                                     Foreground="{Binding AccentBrush}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Title}" FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource PrimaryText}"
+                                               VerticalAlignment="Center" />
+                                    <Button Grid.Column="2" Classes="linkButton" Click="CloseToast"
+                                            Padding="4" ToolTip.Tip="Bezárás">
+                                        <ic:MaterialIcon Kind="Close" Width="14" Height="14"
+                                                         Foreground="{DynamicResource SecondaryText}" />
+                                    </Button>
+                                </Grid>
+                                <TextBlock Grid.Row="1" Text="{Binding Message}" TextWrapping="Wrap"
+                                           MaxWidth="330" FontSize="13"
+                                           Foreground="{DynamicResource PrimaryText}" Margin="0,6,0,0" />
+                                <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="10"
+                                      Margin="0,10,0,9">
+                                    <ProgressBar Minimum="0" Maximum="1" Value="{Binding Progress}"
+                                                 Height="3" VerticalAlignment="Center"
+                                                 Foreground="{Binding AccentBrush}"
+                                                 Background="{DynamicResource SurfaceMutedBackground}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding SecondsRemainingText}"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource SecondaryText}"
+                                               VerticalAlignment="Center" />
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Border Grid.Row="1" Background="{Binding AccentBrush}" Opacity="0.22" />
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+</UserControl>

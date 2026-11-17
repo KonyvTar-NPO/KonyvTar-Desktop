@@ -115,7 +115,7 @@ public partial class LibraryView : UserControl
 
         var editedBook = await new EditBookWindow(book, _viewModel.Books).ShowDialog<Book?>(owner);
         if (editedBook is not null)
-            _viewModel.UpdateBook(book, editedBook);
+            await _viewModel.UpdateBookAsync(book, editedBook);
     }
 
     private async void ReturnSelectedLending(object? sender, RoutedEventArgs e)

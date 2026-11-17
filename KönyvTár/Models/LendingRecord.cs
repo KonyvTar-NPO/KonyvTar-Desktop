@@ -12,4 +12,7 @@ public sealed record LendingRecord(
     DateTimeOffset DueDate,
     DateTimeOffset? ReturnedAt,
     string Status,
-    bool NotifyByEmail);
+    bool NotifyByEmail,
+    string Title = "",
+    string Author = "",
+    string Publisher = "");

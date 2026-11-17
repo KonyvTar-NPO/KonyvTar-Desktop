@@ -1,7 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using Material.Icons;
+using KönyvTár.Services.Api;
 using KönyvTár.ViewModels;
 using KönyvTár.Views.Main;
 
@@ -9,24 +11,38 @@ namespace KönyvTár.Views;
 
 public partial class MainWindow : Window
 {
-    private HomeView _homeView = new HomeView();
-    private LibraryView _libraryView = new LibraryView();
-    private LendingsView _lendingsView = new LendingsView();
-    private SettingsView _settingsView = new SettingsView();
-    private ProfileView _profileView =  new ProfileView();
-    
+    private readonly ApiClient _apiClient;
+    private readonly HomeView _homeView = new();
+    private readonly LibraryView _libraryView = new();
+    private readonly LendingsView _lendingsView = new();
+    private readonly SettingsView _settingsView = new();
+    private readonly ProfileView _profileView = new();
+
     public MainWindow()
+        : this(new MainWindowViewModel(), new ApiClient())
+    {
+    }
+
+    public MainWindow(MainWindowViewModel viewModel, ApiClient apiClient)
     {
         InitializeComponent();
-        DataContext = new MainWindowViewModel();
-        _homeView.DataContext = DataContext;
-        _libraryView.DataContext = DataContext;
-        _lendingsView.DataContext = DataContext;
+        _apiClient = apiClient;
+        DataContext = viewModel;
+
+        _homeView.DataContext = viewModel;
+        _libraryView.DataContext = viewModel;
+        _lendingsView.DataContext = viewModel;
+        _settingsView.DataContext = viewModel;
+        _profileView.DataContext = viewModel;
+        _profileView.SetApiClient(apiClient);
+
         _homeView.LibraryRequested += (_, _) => MainContent.Content = _libraryView;
         _homeView.LendingsRequested += (_, _) => MainContent.Content = _lendingsView;
         MainContent.Content = _homeView;
+
         ThemeButton.Click += OnThemeButtonClick;
         SettingsButton.Click += OnSettingsButtonClick;
+        LogoutButton.Click += OnLogoutButtonClick;
         UpdateThemeButton();
     }
 
@@ -49,12 +65,12 @@ public partial class MainWindow : Window
     {
         MainContent.Content = _profileView;
     }
-    
+
     private void LibraryButton_Click(object? sender, RoutedEventArgs e)
     {
         MainContent.Content = _libraryView;
     }
-    
+
     private void LendingsButton_Click(object? sender, RoutedEventArgs e)
     {
         MainContent.Content = _lendingsView;
@@ -63,5 +79,27 @@ public partial class MainWindow : Window
     private void HomeButton_Click(object? sender, RoutedEventArgs e)
     {
         MainContent.Content = _homeView;
+    }
+
+    private async void OnLogoutButtonClick(object? sender, RoutedEventArgs e)
+    {
+        LogoutButton.IsEnabled = false;
+        try
+        {
+            await _apiClient.LogoutAsync();
+            await SessionStore.ClearAsync();
+        }
+        catch
+        {
+            // The local session is cleared by ApiClient even if the API is unavailable.
+        }
+
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+            return;
+
+        var loginWindow = new LoginWindow();
+        desktop.MainWindow = loginWindow;
+        loginWindow.Show();
+        Close();
     }
 }

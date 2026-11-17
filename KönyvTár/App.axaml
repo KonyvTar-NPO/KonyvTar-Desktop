@@ -214,15 +214,13 @@
             <Setter Property="Background" Value="{DynamicResource PrimaryButtonBackground}"/>
             <Setter Property="Foreground" Value="{DynamicResource PrimaryButtonText}"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Height" Value="48"/>
-            <Setter Property="MinWidth" Value="160"/>
-            <Setter Property="MaxWidth" Value="300"/>
-            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Padding" Value="10"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="CornerRadius" Value="8"/>
         </Style>
         <Style Selector="Button.primaryButton:pointerover">
             <Setter Property="Background" Value="{DynamicResource PrimaryButtonHoverBackground}"/>

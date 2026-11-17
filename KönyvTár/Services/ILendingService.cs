@@ -8,7 +8,18 @@ namespace KönyvTár.Services;
 public interface ILendingService
 {
     Task<IReadOnlyList<LendingRecord>> GetLendingsAsync(CancellationToken cancellationToken = default);
-    Task CreateLendingAsync(LendingRequest request, CancellationToken cancellationToken = default);
-    Task UpdateLendingAsync(LendingRecord lending, CancellationToken cancellationToken = default);
+
+    Task<LendingRecord> CreateLendingAsync(
+        LendingRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<LendingRecord> UpdateLendingAsync(
+        LendingRecord lending,
+        CancellationToken cancellationToken = default);
+
+    Task<LendingRecord> ReturnLendingAsync(
+        LendingRecord lending,
+        CancellationToken cancellationToken = default);
+
     Task DeleteLendingAsync(string lendingId, CancellationToken cancellationToken = default);
 }

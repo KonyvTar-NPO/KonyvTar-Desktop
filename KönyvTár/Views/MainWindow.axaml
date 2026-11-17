@@ -64,8 +64,8 @@
                             <ic:MaterialIconExt Kind="AccountCircle" IconSize="18"/>
                         </Border>
                         <StackPanel Grid.Column="1" IsVisible="{Binding #myDrawerPage.IsOpen}" VerticalAlignment="Center">
-                            <TextBlock Text="Szlonkai Benedek" Foreground="{DynamicResource PrimaryText}" FontSize="14"/>
-                            <TextBlock Text="szlonkaibenedek@gmail.com" Foreground="{DynamicResource SecondaryText}" FontSize="11"/>
+                            <TextBlock Text="{Binding CurrentUserName}" Foreground="{DynamicResource PrimaryText}" FontSize="14"/>
+                            <TextBlock Text="{Binding CurrentUserEmail}" Foreground="{DynamicResource SecondaryText}" FontSize="11"/>
                         </StackPanel>
                     </Grid>
                 </Button>
@@ -74,7 +74,7 @@
 
         <DrawerPage.DrawerFooter>
             <StackPanel Margin="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
-                <Button Classes="drawerButton">
+                <Button x:Name="LogoutButton" Classes="drawerButton" Click="OnLogoutButtonClick">
                     <Grid ColumnDefinitions="40 *">
                         <Border Grid.Column="0" Width="40">
                             <ic:MaterialIconExt Kind="Logout" IconSize="18"/>

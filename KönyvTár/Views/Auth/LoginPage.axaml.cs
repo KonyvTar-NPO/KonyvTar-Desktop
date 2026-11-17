@@ -13,6 +13,12 @@ public partial class LoginPage : UserControl
     public event System.Action? CodeLoginRequested;
     public event System.Action? ForgotPasswordRequested;
 
+    public string? Email => _passwordPage.Email;
+
+    public string? Password => _passwordPage.Password;
+
+    public bool StaySignedIn => _passwordPage.StaySignedIn;
+
     public LoginPage()
     {
         InitializeComponent();
@@ -44,6 +50,13 @@ public partial class LoginPage : UserControl
     }
 
     public void ShowStatus(string message) => _passwordPage.ShowStatus(message);
+
+    public void SetBusy(bool isBusy)
+    {
+        _passwordPage.SetBusy(isBusy);
+        RegisterButton.IsEnabled = !isBusy;
+        LoginMethodToggle.IsEnabled = !isBusy;
+    }
 
     private void ChangeLoginPage(object? sender, RoutedEventArgs e)
     {

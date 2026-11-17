@@ -1,10 +1,9 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
-using Avalonia.Data.Core.Plugins;
-using System.Linq;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
+using KönyvTár.Notifications;
 using KönyvTár.Views;
 
 namespace KönyvTár;
@@ -18,9 +17,12 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        Window.WindowOpenedEvent.AddClassHandler<Window>(
+            (window, _) => ToastLayer.Attach(window));
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow();
+            desktop.MainWindow = new LoginWindow();
         }
 
         base.OnFrameworkInitializationCompleted();

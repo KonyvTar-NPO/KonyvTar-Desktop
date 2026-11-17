@@ -3,13 +3,14 @@ using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KönyvTár.Models;
+using KönyvTár.Notifications;
 using KönyvTár.Services;
+using KönyvTár.Services.Api;
 
 namespace KönyvTár.ViewModels;
 
@@ -18,6 +19,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IBookService _bookService;
     private readonly IUserService _userService;
     private readonly ILendingService _lendingService;
+    private ApiUser? _currentUser;
     private string _searchText = string.Empty;
     private string _statusFilter = "Minden";
     private Book? _selectedBook;
@@ -27,6 +29,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private DateTimeOffset? _toDate = DateTimeOffset.Now.Date.AddDays(1);
     private string _selectedLendingDuration = "1 nap";
     private string _lendingStatusMessage = string.Empty;
+    private string _loadErrorMessage = string.Empty;
+    private bool _isLoading;
     private string _lendingSearchText = string.Empty;
     private string _lendingStatusFilter = "Minden";
     private LendingRecord? _selectedLending;
@@ -35,10 +39,50 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<Book> FilteredBooks { get; } = [];
     public ObservableCollection<string> StatusFilters { get; } = ["Minden"];
     public ObservableCollection<LibraryUser> Users { get; } = [];
+    public ObservableCollection<LibraryUser> AvailableUsers { get; } = [];
     public ObservableCollection<LendingRecord> Lendings { get; } = [];
     public ObservableCollection<LendingRecord> FilteredLendings { get; } = [];
     public ObservableCollection<string> LendingStatusFilters { get; } = ["Minden"];
     public ObservableCollection<string> LendingDurationOptions { get; } = ["1 nap", "1 hét", "1 hónap", "Egyedi"];
+
+    public string CurrentUserName => _currentUser?.FullName ?? "Könyvtáros";
+
+    public string CurrentUserEmail => _currentUser?.Email ?? string.Empty;
+
+    public string CurrentUserRoleLabel => _currentUser?.IsAdmin == true
+        ? "Rendszergazda"
+        : _currentUser?.IsLibrarian == true
+            ? "Könyvtáros"
+            : string.Empty;
+
+    public void ApplyCurrentUser(ApiUser user)
+    {
+        _currentUser = user;
+        OnPropertyChanged(nameof(CurrentUserName));
+        OnPropertyChanged(nameof(CurrentUserEmail));
+        OnPropertyChanged(nameof(CurrentUserRoleLabel));
+        OnPropertyChanged(nameof(CanDeleteLending));
+    }
+
+    public bool CanDeleteLending => _currentUser?.IsAdmin == true;
+
+    public bool IsLoading
+    {
+        get => _isLoading;
+        private set => SetProperty(ref _isLoading, value);
+    }
+
+    public string LoadErrorMessage
+    {
+        get => _loadErrorMessage;
+        private set
+        {
+            if (SetProperty(ref _loadErrorMessage, value))
+                OnPropertyChanged(nameof(HasLoadError));
+        }
+    }
+
+    public bool HasLoadError => !string.IsNullOrWhiteSpace(LoadErrorMessage);
 
     public string SelectedLendingDuration
     {
@@ -105,8 +149,14 @@ public partial class MainWindowViewModel : ViewModelBase
     public string LendingStatusMessage
     {
         get => _lendingStatusMessage;
-        private set => SetProperty(ref _lendingStatusMessage, value);
+        private set
+        {
+            if (SetProperty(ref _lendingStatusMessage, value))
+                OnPropertyChanged(nameof(HasLendingStatusMessage));
+        }
     }
+
+    public bool HasLendingStatusMessage => !string.IsNullOrWhiteSpace(LendingStatusMessage);
 
     public string SearchText
     {
@@ -133,18 +183,21 @@ public partial class MainWindowViewModel : ViewModelBase
     public LendingRecord? SelectedLending
     {
         get => _selectedLending;
-        set { if (SetProperty(ref _selectedLending, value))
+        set
         {
-            OnPropertyChanged(nameof(HasSelectedLending));
-            OnPropertyChanged(nameof(LendingTableColumnWidth));
-            OnPropertyChanged(nameof(LendingDetailsColumnWidth));
-            OnPropertyChanged(nameof(CanReturnSelectedLending));
-        } }
+            if (SetProperty(ref _selectedLending, value))
+            {
+                OnPropertyChanged(nameof(HasSelectedLending));
+                OnPropertyChanged(nameof(LendingTableColumnWidth));
+                OnPropertyChanged(nameof(LendingDetailsColumnWidth));
+                OnPropertyChanged(nameof(CanReturnSelectedLending));
+            }
+        }
     }
 
     public bool HasSelectedLending => SelectedLending is not null;
 
-    public bool CanReturnSelectedLending => SelectedLending is { ReturnedAt: null };
+    public bool CanReturnSelectedLending => SelectedLending is { Status: "Aktív" or "Lejárt" };
 
     public string StatusFilter
     {
@@ -173,6 +226,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 OnPropertyChanged(nameof(BookTableColumnWidth));
                 OnPropertyChanged(nameof(BookDetailsColumnWidth));
 
+                RefreshAvailableUsers();
+
                 if (previousInventoryCode != value?.InventoryCode)
                     ResetLendingInputs();
             }
@@ -192,7 +247,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool HasSelectedBook => SelectedBook is not null;
 
     public LendingRecord? SelectedBookLending => SelectedBook is { } book
-        ? Lendings.FirstOrDefault(lending => lending.InventoryCode == book.InventoryCode && lending.ReturnedAt is null)
+        ? Lendings.FirstOrDefault(lending =>
+            lending.InventoryCode == book.InventoryCode && IsOpenLending(lending))
         : null;
 
     public bool HasSelectedBookLending => SelectedBookLending is not null;
@@ -201,7 +257,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public bool IsSelectedBookLent => SelectedBook?.Status == "Kölcsönözve";
 
-    public bool CanStartLending => HasSelectedBook && !IsSelectedBookLent;
+    public bool CanStartLending =>
+        SelectedBook is { Status: "Elérhető" } && AvailableUsers.Count > 0;
 
     public async Task UpdateLendingAsync(LendingRecord updatedLending)
     {
@@ -209,14 +266,28 @@ public partial class MainWindowViewModel : ViewModelBase
         if (index < 0)
             return;
 
-        await _lendingService.UpdateLendingAsync(updatedLending);
-        Lendings[index] = updatedLending;
-        if (SelectedLending?.Id == updatedLending.Id)
-            SelectedLending = updatedLending;
-        RefreshFilteredLendings();
-        OnPropertyChanged(nameof(SelectedBookLending));
-        OnPropertyChanged(nameof(HasSelectedBookLending));
-        OnPropertyChanged(nameof(ShowMissingSelectedBookLending));
+        try
+        {
+            var savedLending = await _lendingService.UpdateLendingAsync(updatedLending);
+            Lendings[index] = savedLending;
+            if (SelectedLending?.Id == savedLending.Id)
+                SelectedLending = savedLending;
+
+            RefreshFilteredLendings();
+            NotifySelectedBookLendingChanged();
+            const string message = "A kölcsönzés adatai mentve.";
+            LendingStatusMessage = message;
+            ToastService.Instance.ShowSuccess(message);
+        }
+        catch (Exception exception)
+        {
+            var message = DescribeError(
+                exception,
+                "Nem sikerült módosítani a kölcsönzést.");
+            LendingStatusMessage = message;
+            ToastService.Instance.ShowError(message);
+        }
+
         RefreshHomeSummary();
     }
 
@@ -231,17 +302,40 @@ public partial class MainWindowViewModel : ViewModelBase
         if (!Lendings.Any(item => item.Id == lending.Id))
             return;
 
-        await _lendingService.DeleteLendingAsync(lending.Id);
-        Lendings.Remove(Lendings.First(item => item.Id == lending.Id));
-        MakeBookAvailableIfNoActiveLending(lending.InventoryCode);
-        if (SelectedLending?.Id == lending.Id)
-            SelectedLending = null;
-        RefreshFilteredLendings();
-        OnPropertyChanged(nameof(SelectedBookLending));
-        OnPropertyChanged(nameof(HasSelectedBookLending));
-        OnPropertyChanged(nameof(IsSelectedBookLent));
-        OnPropertyChanged(nameof(ShowMissingSelectedBookLending));
-        OnPropertyChanged(nameof(CanStartLending));
+        if (!CanDeleteLending)
+        {
+            const string message = "Könyvtárosként a kölcsönzések törlése nem engedélyezett.";
+            LendingStatusMessage = message;
+            ToastService.Instance.ShowWarning(message);
+            return;
+        }
+
+        try
+        {
+            await _lendingService.DeleteLendingAsync(lending.Id);
+            Lendings.Remove(Lendings.First(item => item.Id == lending.Id));
+            MakeBookAvailableIfNoActiveLending(lending.InventoryCode);
+
+            if (SelectedLending?.Id == lending.Id)
+                SelectedLending = null;
+
+            RefreshFilteredLendings();
+            NotifySelectedBookLendingChanged();
+            OnPropertyChanged(nameof(IsSelectedBookLent));
+            OnPropertyChanged(nameof(CanStartLending));
+            const string message = "A kölcsönzés törölve.";
+            LendingStatusMessage = message;
+            ToastService.Instance.ShowSuccess(message);
+        }
+        catch (Exception exception)
+        {
+            var message = DescribeError(
+                exception,
+                "Nem sikerült törölni a kölcsönzést.");
+            LendingStatusMessage = message;
+            ToastService.Instance.ShowError(message);
+        }
+
         RefreshHomeSummary();
     }
 
@@ -253,34 +347,85 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public async Task ReturnLendingAsync(LendingRecord lending)
     {
-        if (lending.ReturnedAt is not null || !Lendings.Any(item => item.Id == lending.Id))
+        if (!Lendings.Any(item => item.Id == lending.Id))
             return;
 
-        var returnedLending = lending with
+        if (!CanReturnSelectedLendingFor(lending))
         {
-            ReturnedAt = DateTimeOffset.Now,
-            Status = "Visszahozva"
-        };
-        await _lendingService.UpdateLendingAsync(returnedLending);
+            const string message = "Csak aktív vagy lejárt kölcsönzés hozható vissza.";
+            LendingStatusMessage = message;
+            ToastService.Instance.ShowWarning(message);
+            return;
+        }
 
-        var lendingIndex = Lendings.ToList().FindIndex(item => item.Id == lending.Id);
-        if (lendingIndex >= 0)
-            Lendings[lendingIndex] = returnedLending;
-        if (SelectedLending?.Id == lending.Id)
-            SelectedLending = returnedLending;
-        MakeBookAvailableIfNoActiveLending(lending.InventoryCode);
-        RefreshFilteredLendings();
-        OnPropertyChanged(nameof(SelectedBookLending));
-        OnPropertyChanged(nameof(HasSelectedBookLending));
-        OnPropertyChanged(nameof(IsSelectedBookLent));
-        OnPropertyChanged(nameof(CanStartLending));
-        OnPropertyChanged(nameof(ShowMissingSelectedBookLending));
+        try
+        {
+            var returnedLending = await _lendingService.ReturnLendingAsync(lending);
+            var lendingIndex = Lendings.ToList().FindIndex(item => item.Id == lending.Id);
+            if (lendingIndex >= 0)
+                Lendings[lendingIndex] = returnedLending;
+
+            if (SelectedLending?.Id == lending.Id)
+                SelectedLending = returnedLending;
+
+            MakeBookAvailableIfNoActiveLending(returnedLending.InventoryCode);
+            RefreshFilteredLendings();
+            NotifySelectedBookLendingChanged();
+            OnPropertyChanged(nameof(IsSelectedBookLent));
+            OnPropertyChanged(nameof(CanStartLending));
+            const string message = "A könyv visszahozatala rögzítve.";
+            LendingStatusMessage = message;
+            ToastService.Instance.ShowSuccess(message);
+        }
+        catch (Exception exception)
+        {
+            var message = DescribeError(
+                exception,
+                "Nem sikerült rögzíteni a visszahozatalt.");
+            LendingStatusMessage = message;
+            ToastService.Instance.ShowError(message);
+        }
+
         RefreshHomeSummary();
+    }
+
+    public async Task UpdateBookAsync(Book originalBook, Book updatedBook)
+    {
+        try
+        {
+            var savedBook = await _bookService.UpdateBookAsync(originalBook, updatedBook);
+            var index = Books
+                .Select((book, bookIndex) => new { book, bookIndex })
+                .FirstOrDefault(item => item.book.InventoryCode == originalBook.InventoryCode)
+                ?.bookIndex;
+
+            if (index is null)
+                return;
+
+            Books[index.Value] = savedBook;
+            if (SelectedBook?.InventoryCode == originalBook.InventoryCode)
+                SelectedBook = savedBook;
+
+            RefreshStatusFilters();
+            RefreshFilteredBooks();
+            RefreshHomeSummary();
+            const string message = "A könyv adatai mentve.";
+            LendingStatusMessage = message;
+            ToastService.Instance.ShowSuccess(message);
+        }
+        catch (Exception exception)
+        {
+            var message = DescribeError(
+                exception,
+                "Nem sikerült menteni a könyv adatait.");
+            LendingStatusMessage = message;
+            ToastService.Instance.ShowError(message);
+        }
     }
 
     private void MakeBookAvailableIfNoActiveLending(string inventoryCode)
     {
-        if (Lendings.Any(item => item.InventoryCode == inventoryCode && item.ReturnedAt is null))
+        if (Lendings.Any(item => item.InventoryCode == inventoryCode && IsOpenLending(item)))
             return;
 
         var index = Books.ToList().FindIndex(book => book.InventoryCode == inventoryCode);
@@ -291,27 +436,9 @@ public partial class MainWindowViewModel : ViewModelBase
         Books[index] = availableBook;
         if (SelectedBook?.InventoryCode == inventoryCode)
             SelectedBook = availableBook;
-        RefreshStatusFilters();
-        RefreshFilteredBooks();
-    }
-
-    public void UpdateBook(Book originalBook, Book updatedBook)
-    {
-        var index = Books
-            .Select((book, bookIndex) => new { book, bookIndex })
-            .FirstOrDefault(item => item.book.InventoryCode == originalBook.InventoryCode)
-            ?.bookIndex;
-
-        if (index is null)
-            return;
-
-        Books[index.Value] = updatedBook;
-        if (SelectedBook?.InventoryCode == originalBook.InventoryCode)
-            SelectedBook = updatedBook;
 
         RefreshStatusFilters();
         RefreshFilteredBooks();
-        RefreshHomeSummary();
     }
 
     public int TotalBooksCount => Books.Count;
@@ -328,32 +455,31 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public int TotalLendingsCount => Lendings.Count;
 
-    public int ActiveLendingsCount => Lendings.Count(lending => lending.ReturnedAt is null);
+    public int ActiveLendingsCount => Lendings.Count(IsOpenLending);
 
-    public int OverdueLendingsCount => Lendings.Count(lending =>
-        lending.ReturnedAt is null && lending.DueDate.Date < DateTimeOffset.Now.Date);
+    public int OverdueLendingsCount => Lendings.Count(lending => lending.Status == "Lejárt");
 
     public int DueTodayLendingsCount => Lendings.Count(lending =>
-        lending.ReturnedAt is null && lending.DueDate.Date == DateTimeOffset.Now.Date);
+        IsOpenLending(lending) && lending.DueDate.Date == DateTimeOffset.Now.Date);
 
     public int DueSoonLendingsCount => Lendings.Count(lending =>
-        lending.ReturnedAt is null &&
+        IsOpenLending(lending) &&
         lending.DueDate.Date >= DateTimeOffset.Now.Date &&
         lending.DueDate.Date <= DateTimeOffset.Now.Date.AddDays(7));
 
-    public int ReturnedLendingsCount => Lendings.Count(lending => lending.ReturnedAt is not null);
+    public int ReturnedLendingsCount => Lendings.Count(lending => lending.Status == "Visszahozva");
 
     public IReadOnlyList<Book> FeaturedBooks => Books.Take(3).ToList();
 
     public IReadOnlyList<LendingRecord> NextDueLendings => Lendings
-        .Where(lending => lending.ReturnedAt is null)
+        .Where(IsOpenLending)
         .OrderBy(lending => lending.DueDate)
         .Take(3)
         .ToList();
 
     public bool HasFeaturedBooks => Books.Count > 0;
 
-    public bool HasNextDueLendings => Lendings.Any(lending => lending.ReturnedAt is null);
+    public bool HasNextDueLendings => Lendings.Any(IsOpenLending);
 
     private static readonly GridLength FullTableWidth = new(1, GridUnitType.Star);
     private static readonly GridLength SplitTableWidth = new(3, GridUnitType.Star);
@@ -368,54 +494,83 @@ public partial class MainWindowViewModel : ViewModelBase
     public GridLength LendingDetailsColumnWidth => HasSelectedLending ? DetailsWidth : new GridLength(0);
 
     public MainWindowViewModel()
-        : this(new TemporaryBookService(), new TemporaryUserService(), new TemporaryLendingService())
+        : this(new ApiClient())
     {
     }
 
-    public MainWindowViewModel(IBookService bookService)
-        : this(bookService, new TemporaryUserService(), new TemporaryLendingService())
+    public MainWindowViewModel(ApiClient apiClient)
+        : this(
+            new ApiBookService(apiClient),
+            new ApiUserService(apiClient),
+            new ApiLendingService(apiClient),
+            apiClient.CurrentUser)
     {
     }
 
     public MainWindowViewModel(
         IBookService bookService,
         IUserService userService,
-        ILendingService lendingService)
+        ILendingService lendingService,
+        ApiUser? currentUser = null)
     {
         _bookService = bookService;
         _userService = userService;
         _lendingService = lendingService;
+        _currentUser = currentUser;
+
         Books.CollectionChanged += (_, _) => RefreshHomeSummary();
-        Users.CollectionChanged += (_, _) => RefreshHomeSummary();
+        Users.CollectionChanged += (_, _) =>
+        {
+            RefreshAvailableUsers();
+            RefreshHomeSummary();
+        };
         Lendings.CollectionChanged += (_, _) =>
         {
             RefreshHomeSummary();
-            OnPropertyChanged(nameof(SelectedBookLending));
-            OnPropertyChanged(nameof(HasSelectedBookLending));
-            OnPropertyChanged(nameof(ShowMissingSelectedBookLending));
+            NotifySelectedBookLendingChanged();
         };
-        _ = LoadDataAsync();
+
+        if (!Design.IsDesignMode)
+            _ = LoadDataAsync();
     }
 
     private async Task LoadDataAsync()
     {
+        IsLoading = true;
+        var errors = new List<string>();
+
         var booksTask = _bookService.GetBooksAsync();
         var usersTask = _userService.GetUsersAsync();
         var lendingsTask = _lendingService.GetLendingsAsync();
-        await Task.WhenAll(booksTask, usersTask, lendingsTask);
+
+        var books = await LoadOrEmptyAsync(
+            booksTask,
+            "Nem sikerült betölteni a könyvállományt.",
+            errors);
+        var users = await LoadOrEmptyAsync(
+            usersTask,
+            "Nem sikerült betölteni az olvasókat.",
+            errors);
+        var lendings = await LoadOrEmptyAsync(
+            lendingsTask,
+            "Nem sikerült betölteni a kölcsönzéseket.",
+            errors);
 
         Books.Clear();
-        foreach (var book in await booksTask)
+        foreach (var book in books)
             Books.Add(book);
 
         Users.Clear();
-        foreach (var user in await usersTask)
+        foreach (var user in users)
             Users.Add(user);
 
         Lendings.Clear();
-        foreach (var lending in await lendingsTask)
+        foreach (var lending in lendings)
             Lendings.Add(lending);
 
+        LoadErrorMessage = string.Join(" ", errors);
+        if (HasLoadError)
+            ToastService.Instance.ShowError(LoadErrorMessage);
         RefreshStatusFilters();
 
         LendingStatusFilters.Clear();
@@ -425,6 +580,31 @@ public partial class MainWindowViewModel : ViewModelBase
 
         RefreshFilteredBooks();
         RefreshFilteredLendings();
+        RefreshHomeSummary();
+        IsLoading = false;
+    }
+
+    private static async Task<IReadOnlyList<T>> LoadOrEmptyAsync<T>(
+        Task<IReadOnlyList<T>> task,
+        string errorMessage,
+        ICollection<string> errors)
+    {
+        try
+        {
+            return await task;
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            errors.Add(DescribeError(exception, errorMessage));
+            return Array.Empty<T>();
+        }
+    }
+
+    private void ShowLendingWarning(string message)
+    {
+        LendingStatusMessage = message;
+        ToastService.Instance.ShowWarning(message);
     }
 
     [RelayCommand]
@@ -432,46 +612,67 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (SelectedBook is null || SelectedUser is null || FromDate is null || ToDate is null)
         {
-            LendingStatusMessage = "Válasszon könyvet, felhasználót és dátumtartományt.";
+            ShowLendingWarning("Válasszon könyvet, felhasználót és dátumtartományt.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(SelectedUser.Id))
+        {
+            ShowLendingWarning("A kiválasztott olvasó nem azonosítható.");
+            return;
+        }
+
+        if (!SelectedUser.IsMemberOf(SelectedBook.LibraryId))
+        {
+            ShowLendingWarning("A kiválasztott olvasó nem tagja ennek a könyvtárnak.");
             return;
         }
 
         if (ToDate < FromDate)
         {
-            LendingStatusMessage = "A visszahozatali dátum nem lehet korábbi a kölcsönzés dátumánál.";
+            ShowLendingWarning("A visszahozatali dátum nem lehet korábbi a kölcsönzés dátumánál.");
             return;
         }
 
         try
         {
-            await _lendingService.CreateLendingAsync(
+            var lending = await _lendingService.CreateLendingAsync(
                 new LendingRequest(SelectedBook, SelectedUser, FromDate.Value, ToDate.Value));
-            Lendings.Add(new LendingRecord(
-                $"KOL-{Lendings.Count + 1:0000}", SelectedBook.InventoryCode, SelectedUser.Name,
-                "Központi könyvtár", "Szlonkai Benedek", FromDate.Value, ToDate.Value,
-                null, "Aktív", true));
-            var lentBook = SelectedBook with { Status = "Kölcsönözve" };
-            var bookIndex = Books.IndexOf(SelectedBook);
-            if (bookIndex >= 0)
-            {
-                Books[bookIndex] = lentBook;
-                SelectedBook = lentBook;
-                RefreshStatusFilters();
-                RefreshFilteredBooks();
-                OnPropertyChanged(nameof(SelectedBookLending));
-                OnPropertyChanged(nameof(HasSelectedBookLending));
-                OnPropertyChanged(nameof(ShowMissingSelectedBookLending));
-                OnPropertyChanged(nameof(IsSelectedBookLent));
-                OnPropertyChanged(nameof(CanStartLending));
-            }
-            RefreshHomeSummary();
+
+            Lendings.Add(lending);
+            MarkBookAsLent(lending.InventoryCode);
             RefreshFilteredLendings();
-            LendingStatusMessage = "Kölcsönzés sikeresen létrehozva.";
+            NotifySelectedBookLendingChanged();
+            OnPropertyChanged(nameof(IsSelectedBookLent));
+            OnPropertyChanged(nameof(CanStartLending));
+            RefreshHomeSummary();
+            const string message = "Kölcsönzés sikeresen létrehozva.";
+            LendingStatusMessage = message;
+            ToastService.Instance.ShowSuccess(message);
         }
-        catch (Exception)
+        catch (Exception exception)
         {
-            LendingStatusMessage = "A kölcsönzés létrehozása sikertelen.";
+            var message = DescribeError(
+                exception,
+                "A kölcsönzés létrehozása sikertelen.");
+            LendingStatusMessage = message;
+            ToastService.Instance.ShowError(message);
         }
+    }
+
+    private void MarkBookAsLent(string inventoryCode)
+    {
+        var index = Books.ToList().FindIndex(book => book.InventoryCode == inventoryCode);
+        if (index < 0 || Books[index].Status == "Kölcsönözve")
+            return;
+
+        var lentBook = Books[index] with { Status = "Kölcsönözve" };
+        Books[index] = lentBook;
+        if (SelectedBook?.InventoryCode == inventoryCode)
+            SelectedBook = lentBook;
+
+        RefreshStatusFilters();
+        RefreshFilteredBooks();
     }
 
     private void RefreshFilteredBooks()
@@ -507,6 +708,27 @@ public partial class MainWindowViewModel : ViewModelBase
             StatusFilter = "Minden";
     }
 
+    private void RefreshAvailableUsers()
+    {
+        var libraryId = SelectedBook?.LibraryId;
+        var users = string.IsNullOrWhiteSpace(libraryId)
+            ? Users.ToList()
+            : Users.Where(user => user.IsMemberOf(libraryId)).ToList();
+
+        AvailableUsers.Clear();
+        foreach (var user in users)
+            AvailableUsers.Add(user);
+
+        if (SelectedUser is not null &&
+            !AvailableUsers.Any(user => user.Id == SelectedUser.Id))
+        {
+            SelectedUser = null;
+            SelectedUserSearchText = string.Empty;
+        }
+
+        OnPropertyChanged(nameof(CanStartLending));
+    }
+
     private void RefreshHomeSummary()
     {
         OnPropertyChanged(nameof(TotalBooksCount));
@@ -526,6 +748,13 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(HasNextDueLendings));
     }
 
+    private void NotifySelectedBookLendingChanged()
+    {
+        OnPropertyChanged(nameof(SelectedBookLending));
+        OnPropertyChanged(nameof(HasSelectedBookLending));
+        OnPropertyChanged(nameof(ShowMissingSelectedBookLending));
+    }
+
     private void RefreshFilteredLendings()
     {
         var search = LendingSearchText.Trim();
@@ -533,13 +762,26 @@ public partial class MainWindowViewModel : ViewModelBase
             (LendingStatusFilter == "Minden" || lending.Status == LendingStatusFilter) &&
             (search.Length == 0 || lending.Id.Contains(search, StringComparison.OrdinalIgnoreCase) ||
              lending.InventoryCode.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+             lending.Title.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+             lending.Author.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+             lending.Publisher.Contains(search, StringComparison.OrdinalIgnoreCase) ||
              lending.UserName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
              lending.Status.Contains(search, StringComparison.OrdinalIgnoreCase)));
 
         FilteredLendings.Clear();
         foreach (var lending in matches)
             FilteredLendings.Add(lending);
+
         if (SelectedLending is not null && !FilteredLendings.Contains(SelectedLending))
             SelectedLending = null;
     }
+
+    private static bool IsOpenLending(LendingRecord lending) =>
+        lending.Status is "Aktív" or "Lejárt";
+
+    private static bool CanReturnSelectedLendingFor(LendingRecord lending) =>
+        lending.Status is "Aktív" or "Lejárt";
+
+    private static string DescribeError(Exception exception, string fallbackMessage) =>
+        exception is ApiException apiException ? apiException.Message : fallbackMessage;
 }
