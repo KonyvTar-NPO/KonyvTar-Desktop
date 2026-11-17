@@ -12,10 +12,6 @@
             <TextBlock Text="Könyvtár kezelése" Classes="pageTitle" />
             <TextBlock Text="Könyvek keresése, szerkesztése és kölcsönzése."
                        Classes="pageSubtitle" />
-            <TextBlock Text="{Binding LoadErrorMessage}" IsVisible="{Binding HasLoadError}"
-                       Foreground="{DynamicResource DangerText}" TextWrapping="Wrap" />
-            <TextBlock Text="{Binding LendingStatusMessage}" IsVisible="{Binding HasLendingStatusMessage}"
-                       Foreground="{DynamicResource SecondaryText}" TextWrapping="Wrap" />
         </StackPanel>
 
         <Border Grid.Row="1" Classes="card" Padding="16">
