@@ -8,25 +8,24 @@ namespace KönyvTár.Notifications;
 public sealed class ToastMessage : ObservableObject
 {
     private static readonly IBrush InfoAccent = new SolidColorBrush(Color.Parse("#3B82F6"));
-    private static readonly IBrush InfoBackground = new SolidColorBrush(Color.Parse("#1A3B82F6"));
+    private static readonly IBrush InfoBackground = new SolidColorBrush(Color.Parse("#123B82F6"));
     private static readonly IBrush InfoBorder = new SolidColorBrush(Color.Parse("#663B82F6"));
 
     private static readonly IBrush SuccessAccent = new SolidColorBrush(Color.Parse("#22C55E"));
-    private static readonly IBrush SuccessBackground = new SolidColorBrush(Color.Parse("#1A22C55E"));
+    private static readonly IBrush SuccessBackground = new SolidColorBrush(Color.Parse("#1222C55E"));
     private static readonly IBrush SuccessBorder = new SolidColorBrush(Color.Parse("#6622C55E"));
 
     private static readonly IBrush WarningAccent = new SolidColorBrush(Color.Parse("#F59E0B"));
-    private static readonly IBrush WarningBackground = new SolidColorBrush(Color.Parse("#1AF59E0B"));
+    private static readonly IBrush WarningBackground = new SolidColorBrush(Color.Parse("#12F59E0B"));
     private static readonly IBrush WarningBorder = new SolidColorBrush(Color.Parse("#66F59E0B"));
 
     private static readonly IBrush ErrorAccent = new SolidColorBrush(Color.Parse("#EF4444"));
-    private static readonly IBrush ErrorBackground = new SolidColorBrush(Color.Parse("#1AEF4444"));
+    private static readonly IBrush ErrorBackground = new SolidColorBrush(Color.Parse("#12EF4444"));
     private static readonly IBrush ErrorBorder = new SolidColorBrush(Color.Parse("#66EF4444"));
 
     private readonly TimeSpan _duration;
     private TimeSpan _remaining;
     private double _progress = 1;
-    private int _secondsRemaining;
 
     public ToastMessage(string message, ToastKind kind, TimeSpan duration)
     {
@@ -34,7 +33,6 @@ public sealed class ToastMessage : ObservableObject
         Kind = kind;
         _duration = duration > TimeSpan.Zero ? duration : TimeSpan.FromSeconds(4);
         _remaining = _duration;
-        _secondsRemaining = Math.Max(1, (int)Math.Ceiling(_duration.TotalSeconds));
     }
 
     public string Message { get; }
@@ -87,18 +85,6 @@ public sealed class ToastMessage : ObservableObject
         private set => SetProperty(ref _progress, value);
     }
 
-    public int SecondsRemaining
-    {
-        get => _secondsRemaining;
-        private set
-        {
-            if (SetProperty(ref _secondsRemaining, value))
-                OnPropertyChanged(nameof(SecondsRemainingText));
-        }
-    }
-
-    public string SecondsRemainingText => $"{SecondsRemaining} mp";
-
     public bool IsExpired => _remaining <= TimeSpan.Zero;
 
     public void Advance(TimeSpan elapsed)
@@ -111,6 +97,5 @@ public sealed class ToastMessage : ObservableObject
             _remaining = TimeSpan.Zero;
 
         Progress = Math.Clamp(_remaining.TotalMilliseconds / _duration.TotalMilliseconds, 0, 1);
-        SecondsRemaining = Math.Max(0, (int)Math.Ceiling(_remaining.TotalSeconds));
     }
 }
